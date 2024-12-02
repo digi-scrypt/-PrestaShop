@@ -525,6 +525,7 @@ class FrontControllerCore extends Controller
             'configuration' => $this->getTemplateVarConfiguration(),
             'field_required' => $this->context->customer->validateFieldsRequiredDatabase(),
             'breadcrumb' => $this->getBreadcrumb(),
+            'structured_data' => $this->getStructuredData(),
             'link' => $this->context->link,
             'time' => time(),
             'static_token' => Tools::getToken(false),
@@ -1823,6 +1824,64 @@ class FrontControllerCore extends Controller
         }
 
         return $page;
+    }
+
+    /**
+     * Returns structured data for this page. This parent method renders
+     * the basic data for the shop. Other controllers (product, cms) should
+     * further enrich it.
+     *
+     * @return array
+     */
+    public function getStructuredData()
+    {
+        // Basic organization and webpage
+        $structuredData = [
+            'organization' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                'name' => Configuration::get('PS_SHOP_NAME'),
+                'url' => $this->getTemplateVarUrls()['pages']['index'],
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => $this->getShopLogo()['src']
+                ],
+            ],
+            'webpage' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                'isPartOf' => [
+                    '@type' => 'WebSite',
+                    'url' => $this->getTemplateVarUrls()['pages']['index'],
+                    'name' => Configuration::get('PS_SHOP_NAME'),
+                ],
+                'name' => $this->getTemplateVarPage()['meta']['title'],
+                'url' => $this->getTemplateVarUrls()['current_url'],
+            ],
+        ];
+
+        // Add breadcrumbs
+        $breadcrumbLinks = $this->getBreadcrumbLinks();
+        if (!empty($breadcrumbLinks['links'][0])) {
+            $breadcrumbStructuredData = [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [],
+            ];
+            $counter = 1;
+            foreach ($breadcrumbLinks['links'] as $link) {
+                $breadcrumbStructuredData['itemListElement'][] = [
+                    '@type' => 'ListItem',
+                    'position' => $counter,
+                    'name' => $link['title'],
+                    'item' => $link['url'],
+                ];
+                $counter++;
+            }
+            $structuredData['breadcrumbs'] = $breadcrumbStructuredData;
+        }
+
+        return $structuredData;
     }
 
     /**

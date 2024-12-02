@@ -1355,6 +1355,25 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         return $breadcrumb;
     }
 
+    /**
+     * Generates structured data for this product and extends the general data.
+     *
+     * @return array
+     */
+    public function getStructuredData(): array
+    {
+        $structuredData = parent::getStructuredData();
+
+        // TODO
+        // Add data for our product
+        $structuredData['product'] = [
+            '@context' => 'https://schema.org/',
+            '@type' => 'Product',
+        ];
+
+        return $structuredData;
+    }
+
     protected function addProductCustomizationData(array $product_full)
     {
         if ($product_full['customizable']) {
