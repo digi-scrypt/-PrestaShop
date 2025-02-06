@@ -176,7 +176,7 @@ final class GetOrderForViewingHandler extends AbstractOrderHandler implements Ge
     public function handle(GetOrderForViewing $query): OrderForViewing
     {
         $order = $this->getOrder($query->getOrderId());
-        $orderCarrier = new Carrier($order->id_carrier);
+        $orderCarrier = new Carrier($order->id_carrier, $this->contextLanguageId);
         $taxCalculationMethod = $this->getOrderTaxCalculationMethod($order);
 
         $isTaxIncluded = ($taxCalculationMethod == PS_TAX_INC);
@@ -534,7 +534,7 @@ final class GetOrderForViewingHandler extends AbstractOrderHandler implements Ge
         $carrierModuleInfo = null;
 
         $currency = new Currency($order->id_currency);
-        $carrier = new Carrier($order->id_carrier);
+        $carrier = new Carrier($order->id_carrier, $this->contextLanguageId);
         $carrierModuleInfo = null;
 
         if ($carrier->is_module) {

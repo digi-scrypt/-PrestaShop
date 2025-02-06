@@ -24,7 +24,8 @@ Feature: Carrier management
 
   Scenario: Adding new Carrier
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -41,7 +42,8 @@ Feature: Carrier management
       | zones            | zone1                              |
       | rangeBehavior    | disabled                           |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 4                                  |
@@ -78,7 +80,8 @@ Feature: Carrier management
       | payment module name | dummy_payment              |
       | status              | Awaiting bank wire payment |
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -98,17 +101,21 @@ Feature: Carrier management
     When I update order "bo_order1" Tracking number to "TEST1234" and Carrier to "carrier1"
     Then order "bo_order1" has Tracking number "TEST1234"
     When I edit carrier "carrier1" with specified properties I get a new carrier referenced as "newCarrier1":
-      | name | Carrier 1 new |
+      | name[en-US]      | Carrier 1 new   |
+      | name[fr-FR]      | Carrier 1 new   |
     Then carrier "carrier1" should have the following properties:
-      | name        | Carrier 1 |
-      | ordersCount | 1         |
+      | name[en-US]      | Carrier 1    |
+      | name[fr-FR]      | Carrier 1    |
+      | ordersCount      | 1            |
     Then carrier "newCarrier1" should have the following properties:
-      | name        | Carrier 1 new |
-      | ordersCount | 0             |
+      | name[en-US]      | Carrier 1 new   |
+      | name[fr-FR]      | Carrier 1 new   |
+      | ordersCount      | 0               |
 
   Scenario: Partially editing carrier with name and without an order linked
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -125,9 +132,10 @@ Feature: Carrier management
       | shippingMethod   | weight                             |
       | rangeBehavior    | disabled                           |
     When I edit carrier "carrier1" with specified properties I get a similar carrier called "newCarrier1":
-      | name | Carrier 1 new |
+      | name[en-US] | Carrier 1 new |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1 new                      |
+      | name[en-US]      | Carrier 1 new                      |
+      | name[fr-FR]      | Carrier 1 new                      |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 6                                  |
@@ -145,7 +153,8 @@ Feature: Carrier management
       | shippingMethod   | weight                             |
       | rangeBehavior    | disabled                           |
     Then carrier "newCarrier1" should have the following properties:
-      | name             | Carrier 1 new                      |
+      | name[en-US]      | Carrier 1 new                      |
+      | name[fr-FR]      | Carrier 1 new                      |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 6                                  |
@@ -164,7 +173,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with grade
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -183,7 +193,8 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | grade | 2 |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 2                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 7                                  |
@@ -202,7 +213,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with tracking url
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -221,7 +233,8 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | trackingUrl | http://prestashop-project.org/track.php?num=@ |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                                     |
+      | name[en-US]      | Carrier 1                                     |
+      | name[fr-FR]      | Carrier 1                                     |
       | grade            | 1                                             |
       | trackingUrl      | http://prestashop-project.org/track.php?num=@ |
       | position         | 8                                             |
@@ -240,7 +253,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with position (and forced position on creation)
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 2                                  |
@@ -258,7 +272,8 @@ Feature: Carrier management
       | shippingMethod   | weight                             |
       | rangeBehavior    | disabled                           |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 2                                  |
@@ -277,7 +292,8 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | position | 4 |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 4                                  |
@@ -296,7 +312,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with active
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -315,7 +332,8 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | active | false |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 9                                  |
@@ -334,7 +352,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with delay
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -354,7 +373,8 @@ Feature: Carrier management
       | delay[en-US] | Shipping delay new         |
       | delay[fr-FR] | Délai de livraison nouveau |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 10                                 |
@@ -373,7 +393,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with width height depth weight
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -395,7 +416,8 @@ Feature: Carrier management
       | max_depth  | 5555 |
       | max_weight | 6666 |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 11                                 |
@@ -414,7 +436,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with group_access
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -433,7 +456,8 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | group_access | visitor |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | position         | 12                                 |
@@ -452,7 +476,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with handling shipping
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -471,12 +496,14 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | shippingHandling | true |
     Then carrier "carrier1" should have the following properties:
-      | name             | Carrier 1 |
-      | shippingHandling | true      |
+      | name[en-US]      | Carrier 1   |
+      | name[fr-FR]      | Carrier 1   |
+      | shippingHandling | true        |
 
   Scenario: Partially editing carrier with free shipping
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -495,12 +522,14 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | isFree | true |
     Then carrier "carrier1" should have the following properties:
-      | name   | Carrier 1 |
-      | isFree | true      |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
+      | isFree           | true                               |
 
   Scenario: Partially editing carrier with shipping method
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -519,12 +548,14 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | shippingMethod | price |
     Then carrier "carrier1" should have the following properties:
-      | name           | Carrier 1 |
-      | shippingMethod | price     |
+      | name[en-US]    | Carrier 1                          |
+      | name[fr-FR]    | Carrier 1                          |
+      | shippingMethod | price                              |
 
   Scenario: Partially editing carrier with invalid shipping method
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -547,7 +578,8 @@ Feature: Carrier management
   # @debug
   # Scenario: Partially editing carrier with tax rule group
   #   When I create carrier "carrier1" with specified properties:
-  #     | name             | Carrier 1                          |
+  #     | name[en-US]      | Carrier 1                          |
+  #     | name[fr-FR]      | Carrier 1                          |
   #     | grade            | 1                                  |
   #     | trackingUrl      | http://example.com/track.php?num=@ |
   #     | position         | 2                                  |
@@ -567,12 +599,14 @@ Feature: Carrier management
   #   When I edit carrier "carrier1" with specified properties:
   #     | taxRuleGroup | US-AZ Rate (6.6%)              |
   #   Then carrier "carrier1" should have the following properties:
-  #     | name         | Carrier 1                       |
+  #     | name[en-US]      | Carrier 1                   |
+  #     | name[fr-FR]      | Carrier 1                   |
   #     | taxRuleGroup | US-AZ Rate (6.6%)               |
 
   Scenario: Partially editing carrier with range behavior
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -591,12 +625,14 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | rangeBehavior | highest_range |
     Then carrier "carrier1" should have the following properties:
-      | name          | Carrier 1     |
-      | rangeBehavior | highest_range |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
+      | rangeBehavior    | highest_range                      |
 
   Scenario: Partially editing carrier with invalid range behavior
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -618,7 +654,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with additional fees and is free already true
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -642,7 +679,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with is free and additional fees already true
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -666,7 +704,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with is free and additional fees at true
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -689,7 +728,8 @@ Feature: Carrier management
 
   Scenario: Upload logo for carrier
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -710,7 +750,8 @@ Feature: Carrier management
 
   Scenario: Upload logo for carrier then edit this carrier to delete logo.
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -734,7 +775,8 @@ Feature: Carrier management
 
   Scenario: Partially editing carrier with zones
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -753,12 +795,14 @@ Feature: Carrier management
     When I edit carrier "carrier1" with specified properties:
       | zones     | zone1     |
     Then carrier "carrier1" should have the following properties:
-      | name      | Carrier 1 |
-      | zones     | zone1     |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
+      | zones            | zone1                              |
 
   Scenario: Add a new carrier without any zone
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |
@@ -778,7 +822,8 @@ Feature: Carrier management
 
   Scenario: Edit a new carrier and delete all zone
     When I create carrier "carrier1" with specified properties:
-      | name             | Carrier 1                          |
+      | name[en-US]      | Carrier 1                          |
+      | name[fr-FR]      | Carrier 1                          |
       | grade            | 1                                  |
       | trackingUrl      | http://example.com/track.php?num=@ |
       | active           | true                               |

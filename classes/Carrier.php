@@ -54,7 +54,7 @@ class CarrierCore extends ObjectModel
     /** @var int common id for carrier historization */
     public $id_reference;
 
-    /** @var string Name */
+    /** @var string[]|string Name */
     public $name;
 
     /** @var string URL with a '@' for */
@@ -130,7 +130,6 @@ class CarrierCore extends ObjectModel
         'fields' => [
             /* Classic fields */
             'id_reference' => ['type' => self::TYPE_INT],
-            'name' => ['type' => self::TYPE_STRING, 'validate' => 'isCarrierName', 'required' => true, 'size' => 64],
             'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool', 'required' => true],
             'is_free' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
             'url' => ['type' => self::TYPE_STRING, 'validate' => 'isAbsoluteUrl', 'size' => 255],
@@ -150,6 +149,7 @@ class CarrierCore extends ObjectModel
             'deleted' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
 
             /* Lang fields */
+            'name' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isCarrierName', 'required' => true, 'size' => 64],
             'delay' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'required' => true, 'size' => 512],
         ],
     ];
@@ -527,7 +527,7 @@ class CarrierCore extends ObjectModel
             return [];
         }
 
-        $sql = 'SELECT c.*, cl.delay
+        $sql = 'SELECT c.*, cl.name, cl.delay
                 FROM `' . _DB_PREFIX_ . 'carrier` c
                 LEFT JOIN `' . _DB_PREFIX_ . 'carrier_lang` cl ON (c.`id_carrier` = cl.`id_carrier` AND cl.`id_lang` = ' . (int) $id_lang . Shop::addSqlRestrictionOnLang('cl') . ')
                 LEFT JOIN `' . _DB_PREFIX_ . 'carrier_zone` cz ON (cz.`id_carrier` = c.`id_carrier`)' .
@@ -618,7 +618,7 @@ class CarrierCore extends ObjectModel
             ORDER BY s.`name` ASC');
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
-            SELECT cl.*,c.*, cl.`name` AS country, zz.`name` AS zone
+            SELECT cl.*, c.*, cl.`name` AS country, zz.`name` AS zone
             FROM `' . _DB_PREFIX_ . 'country` c' .
             Shop::addSqlAssociation('country', 'c') . '
             LEFT JOIN `' . _DB_PREFIX_ . 'country_lang` cl ON (c.`id_country` = cl.`id_country` AND cl.`id_lang` = ' . (int) $id_lang . ')
