@@ -36,8 +36,8 @@ use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
 use PrestaShop\PrestaShop\Core\Module\ModuleOverrideChecker;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use PrestaShop\PrestaShop\Core\Security\Permission;
+use PrestaShop\PrestaShop\Core\Util\Database\EntitySchemaManagerInterface;
 use PrestaShop\TranslationToolsBundle\Translation\Helper\DomainHelper;
-use PrestaShopBundle\Utils\Database\EntitySchemaManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -3705,9 +3705,9 @@ abstract class ModuleCore implements ModuleInterface
     /**
      * Return entity schema manager service
      *
-     * @return EntitySchemaManager
+     * @return EntitySchemaManagerInterface
      */
-    public function getEntitySchemaManager(): EntitySchemaManager
+    public function getEntitySchemaManager(): EntitySchemaManagerInterface
     {
         return $this->get('prestashop.util.database.entity_schema_manager');
     }
