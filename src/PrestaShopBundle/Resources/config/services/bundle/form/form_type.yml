@@ -907,6 +907,8 @@ services:
       - '@=service("prestashop.core.b2b.b2b_feature").isActive()'
       - '@=service("prestashop.adapter.legacy.configuration").get("PS_CUSTOMER_OPTIN")'
       - "@=service('prestashop.adapter.legacy.configuration')"
+      - '@=service("prestashop.adapter.form.choice_provider.language_by_id_choice_provider").getChoices()'
+
     tags:
       - { name: form.type }
 

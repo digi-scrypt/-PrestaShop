@@ -69,6 +69,11 @@ class CustomerType extends TranslatorAwareType
     private $groupChoices;
 
     /**
+     * @var array
+     */
+    private $languageChoices;
+
+    /**
      * @var bool
      */
     private $isB2bFeatureEnabled;
@@ -104,7 +109,8 @@ class CustomerType extends TranslatorAwareType
         array $riskChoices,
         $isB2bFeatureEnabled,
         $isPartnerOffersEnabled,
-        ConfigurationInterface $configuration
+        ConfigurationInterface $configuration,
+        array $languageChoices
     ) {
         parent::__construct($translator, $locales);
         $this->genderChoices = $genderChoices;
@@ -113,6 +119,7 @@ class CustomerType extends TranslatorAwareType
         $this->riskChoices = $riskChoices;
         $this->isPartnerOffersEnabled = $isPartnerOffersEnabled;
         $this->configuration = $configuration;
+        $this->languageChoices = $languageChoices;
     }
 
     /**
@@ -285,6 +292,16 @@ class CustomerType extends TranslatorAwareType
                 'required' => false,
                 'placeholder' => null,
                 'choices' => $this->groupChoices,
+                'attr' => [
+                    'data-toggle' => 'select2',
+                    'data-minimumResultsForSearch' => '7',
+                ],
+            ])
+            ->add('language_id', ChoiceType::class, [
+                'label' => $this->trans('Language', 'Admin.Global'),
+                'required' => false,
+                'placeholder' => null,
+                'choices' => $this->languageChoices,
                 'attr' => [
                     'data-toggle' => 'select2',
                     'data-minimumResultsForSearch' => '7',
