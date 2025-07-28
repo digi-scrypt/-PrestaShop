@@ -160,6 +160,7 @@ class Install extends AbstractInstall
      * Generate the settings file.
      */
     public function generateSettingsFile(
+        $database_type,
         $database_host,
         $database_user,
         $database_password,
@@ -220,6 +221,7 @@ class Install extends AbstractInstall
                 'database_name' => $database_name,
                 'database_prefix' => $database_prefix,
                 'database_engine' => $database_engine,
+                'database_type' => $database_type,
                 'cookie_key' => $cookie_key,
                 'cookie_iv' => $cookie_iv,
                 'new_cookie_key' => $key,
@@ -312,8 +314,11 @@ class Install extends AbstractInstall
             $this->clearDatabase();
         }
 
-        $allowed_collation = ['utf8mb4_general_ci', 'utf8mb4_unicode_ci'];
-        $collation_database = Db::getInstance()->getValue('SELECT @@collation_database');
+        $collation_database = '';
+        if (_DB_TYPE_ == 'mysql') {
+            $allowed_collation = ['utf8mb4_general_ci', 'utf8mb4_unicode_ci'];
+            $collation_database = Db::getInstance()->getValue('SELECT @@collation_database');
+        }
         // Install database structure
         $sql_loader = new SqlLoader();
         $sql_loader->setMetaData([
@@ -323,7 +328,7 @@ class Install extends AbstractInstall
         ]);
 
         try {
-            $sql_loader->parse_file(_PS_INSTALL_DATA_PATH_ . 'db_structure.sql');
+            $sql_loader->parse_file(_PS_INSTALL_DATA_PATH_ . (_DB_TYPE_ == 'mysql' ? 'db_structure.sql' : 'db_structure.pgsql.sql'));
         } catch (PrestashopInstallerException) {
             $this->setError($this->translator->trans('Database structure file not found', [], 'Install'));
 
@@ -351,15 +356,23 @@ class Install extends AbstractInstall
         $this->getLogger()->logInfo($truncate ? 'Truncating database' : 'Dropping database tables');
 
         $instance = Db::getInstance();
-        $instance->execute('SET FOREIGN_KEY_CHECKS=0');
-        foreach ($instance->executeS('SHOW TABLES') as $row) {
+        if (_DB_TYPE_ == 'mysql') {
+            $instance->execute('SET FOREIGN_KEY_CHECKS=0');
+        }
+        foreach ($instance->executeS(
+            _DB_TYPE_ == 'mysql'
+            ? 'SHOW TABLES'
+            : 'SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname=\'public\';'
+        ) as $row) {
             $table = current($row);
             if (empty(_DB_PREFIX_) || preg_match('#^' . _DB_PREFIX_ . '#i', $table)) {
-                $instance->execute(($truncate ? 'TRUNCATE TABLE ' : 'DROP TABLE ') . '`' . $table . '`');
+                $instance->execute(($truncate ? 'TRUNCATE TABLE ' : 'DROP TABLE ') . '"' . $table . '"');
             }
         }
 
-        $instance->execute('SET FOREIGN_KEY_CHECKS=1');
+        if (_DB_TYPE_ == 'mysql') {
+            $instance->execute('SET FOREIGN_KEY_CHECKS=1');
+        }
     }
 
     /**

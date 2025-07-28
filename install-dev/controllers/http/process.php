@@ -152,6 +152,7 @@ class InstallControllerHttpProcess extends InstallControllerHttp implements Http
         file_put_contents(PS_INSTALLATION_LOCK_FILE, '1');
 
         $success = $this->model_install->generateSettingsFile(
+            'mysql',
             $this->session->database_server,
             $this->session->database_login,
             $this->session->database_password,

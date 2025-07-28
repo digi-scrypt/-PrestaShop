@@ -218,6 +218,7 @@ class InstallControllerConsoleProcess extends InstallControllerConsole implement
     public function processGenerateSettingsFile()
     {
         return $this->model_install->generateSettingsFile(
+            $this->datas->database_type,
             $this->datas->database_server,
             $this->datas->database_login,
             $this->datas->database_password,

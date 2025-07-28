@@ -1,14 +1,15 @@
 <?php return array (
     'parameters' =>
         array (
-            'database_driver' => 'pdo_mysql',
+            'database_driver' => 'pdo_pgsql',
             'database_host' => '127.0.0.1',
-            'database_port' => '',
+            'database_port' => '5432',
             'database_name' => 'prestashop',
             'database_user' => 'root',
             'database_password' => 'password',
             'database_prefix' => 'ps_',
             'database_engine' => 'InnoDB',
+            'database_type' => 'pgsql',
             'mailer_transport' => 'smtp',
             'mailer_host' => '127.0.0.1',
             'mailer_user' => NULL,

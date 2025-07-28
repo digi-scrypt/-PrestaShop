@@ -31,6 +31,7 @@
  * @property string $timezone
  * @property string $base_uri
  * @property string $http_host
+ * @property string $database_type
  * @property string $database_server
  * @property string $database_login
  * @property string $database_password
@@ -86,6 +87,11 @@ class Datas
             'name' => 'domain',
             'validate' => 'isGenericName',
             'default' => 'localhost',
+        ],
+        'database_type' => [
+            'name' => 'db_type',
+            'default' => 'mysql',
+            'help' => 'mysql,pgsql'
         ],
         'database_server' => [
             'name' => 'db_server',
