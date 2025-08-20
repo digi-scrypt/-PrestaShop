@@ -130,14 +130,14 @@ describe('FO - Checkout : Display of highlighted cart rule', async () => {
     it('should verify the total after the discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount3', baseContext);
 
-      const totalAfterPromoCode: number = dataProducts.demo_6.combinations[0].price
-        - parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+      const discount: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+      const totalAfterPromoCode: number = dataProducts.demo_6.combinations[0].price - discount;
 
       const priceATI = await foHummingbirdCartPage.getATIPrice(page);
       expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
       const discountValue = await foHummingbirdCartPage.getCartRuleValue(page, 1);
-      expect(discountValue).to.equal(`-€${parseFloat(cartRuleWithCodeData.discountAmount!.value.toString()).toFixed(2)}`);
+      expect(discountValue).to.equal(`-€${discount.toFixed(2)}`);
     });
 
     it('should remove the discount', async function () {

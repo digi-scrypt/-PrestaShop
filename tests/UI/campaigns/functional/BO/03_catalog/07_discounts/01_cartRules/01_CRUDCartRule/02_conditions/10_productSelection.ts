@@ -203,9 +203,9 @@ describe('BO - Catalog - Cart rules : Product selection', async () => {
 
       const total = dataProducts.demo_8.finalPrice + dataProducts.demo_1.finalPrice + dataProducts.demo_3.finalPrice;
 
-      const discount = await utilsCore.percentage(total, newCartRuleData.getDiscountPercent());
+      const discount = utilsCore.percentage(total, newCartRuleData.getDiscountPercent());
 
-      const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
+      const discountValue = await foClassicCartPage.getCartRuleValue(page);
       expect(discountValue).to.equal(`-€${discount.toFixed(2)}`);
     });
 
@@ -223,9 +223,9 @@ describe('BO - Catalog - Cart rules : Product selection', async () => {
 
       const total = dataProducts.demo_8.finalPrice + dataProducts.demo_3.finalPrice;
 
-      const discount = await utilsCore.percentage(total, newCartRuleData.getDiscountPercent());
+      const discount = utilsCore.percentage(total, newCartRuleData.getDiscountPercent());
 
-      const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
+      const discountValue = await foClassicCartPage.getCartRuleValue(page);
       expect(discountValue).to.equal(`-€${discount.toFixed(2)}`);
     });
 
