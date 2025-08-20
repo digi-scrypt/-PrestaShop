@@ -153,13 +153,14 @@ jobs:
           PHP_VERSION: 8.1
           ENABLE_SSL: 'true'
           INSTALL_AUTO: 'true'
+          DISABLE_MAKE: 'false'
       - name: Setup Environment failure
         uses: ./.github/actions/setup-env-export-logs
         with:
           DOCKER_PREFIX: prestashop
           ARTIFACT_NAME: setup-symfony-console-${{ matrix.app-id }}
           ENABLE_SSL: 'true'
-          INSTALL_AUTO: 'false'
+          INSTALL_AUTO: 'true'
         if: failure()
 
       - name: Run Admin Security Attribute Linter (inside the docker so installed modules are also scanned)

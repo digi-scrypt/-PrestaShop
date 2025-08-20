@@ -140,9 +140,9 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         const cartRuleName = await foClassicCartPage.getCartRuleName(page);
         expect(cartRuleName).to.equal(cartRuleWithoutCode.name);
 
-        const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
+        const discountValue = await foClassicCartPage.getCartRuleValue(page);
         expect(discountValue).to.equal(
-          `-€${Math.abs(parseFloat(totalAfterDiscount.toFixed(2)) - dataProducts.demo_1.finalPrice).toFixed(2)}`,
+          `-€${Math.abs(parseFloat(totalAfterDiscount.toFixed(2)) - dataProducts.demo_1.finalPrice)}`,
         );
       });
 
@@ -243,7 +243,9 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
         const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
-        expect(discountValue).to.equal(`-€${Math.abs(totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)}`);
+        expect(discountValue).to.equal(
+          `-€${Math.abs(parseFloat((totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)))}`,
+        );
       });
 
       it('should remove voucher and product from shopping cart', async function () {
@@ -344,13 +346,15 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount3', baseContext);
 
         const totalAfterPromoCode = dataProducts.demo_1.finalPrice
-          - ((dataProducts.demo_1.finalPrice * (cartRuleWithCode.getDiscountPercent())) / 100);
+          - ((dataProducts.demo_1.finalPrice * cartRuleWithCode.getDiscountPercent()) / 100);
 
         const priceATI = await foClassicCartPage.getATIPrice(page);
         expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
         const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
-        expect(discountValue).to.equal(`-€${Math.abs(totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)}`);
+        expect(discountValue).to.equal(
+          `-€${Math.abs(parseFloat((totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)))}`,
+        );
       });
 
       it('should remove voucher and product from shopping cart', async function () {

@@ -250,9 +250,7 @@ describe('BO - Catalog - Cart rules : Country selection', async () => {
 
       const totalAfterDiscount = await foClassicCheckoutPage.getATIPrice(page);
       expect(totalAfterDiscount).to.eq(
-        dataProducts.demo_6.price
-        - parseFloat(cartRule.discountAmount!.value.toString())
-        + dataCarriers.myCarrier.price,
+        dataProducts.demo_6.price - parseFloat(cartRule.discountAmount!.value.toString()) + dataCarriers.myCarrier.price,
       );
     });
 
