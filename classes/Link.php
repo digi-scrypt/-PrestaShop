@@ -952,7 +952,6 @@ class LinkCore
         $overrideUrl = Hook::exec(
             'overrideImageLink',
             [
-                'object' => 'image',
                 'name' => $name,
                 'ids' => $idImage,
                 'type' => $type,
@@ -1001,7 +1000,6 @@ class LinkCore
         Hook::exec(
             'adaptImageLink',
             [
-                'object' => 'image',
                 'protocol_content' => $this->protocol_content,
                 'uri_path' => $uriPath,
                 'url' => &$url,
