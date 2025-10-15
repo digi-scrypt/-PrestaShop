@@ -165,7 +165,8 @@ class CustomerFeatureContext extends AbstractDomainFeatureContext
             (isset($data['genderId']) ? $data['genderId'] : null),
             (isset($data['isEnabled']) ? $data['isEnabled'] : true),
             (isset($data['isPartnerOffersSubscribed']) ? $data['isPartnerOffersSubscribed'] : false),
-            (isset($data['birthday']) ? $data['birthday'] : null)
+            (isset($data['birthday']) ? $data['birthday'] : null),
+            (isset($data['languageId']) ? $data['languageId'] : 0)
         );
 
         if (Configuration::get('PS_B2B_ENABLE')) {

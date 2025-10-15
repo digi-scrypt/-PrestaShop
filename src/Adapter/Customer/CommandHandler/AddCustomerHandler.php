@@ -130,6 +130,7 @@ final class AddCustomerHandler extends AbstractCustomerHandler implements AddCus
         $customer->optin = $command->isPartnerOffersSubscribed();
         $customer->birthday = $command->getBirthday()->getValue();
         $customer->id_shop = $command->getShopId();
+        $customer->id_lang = $command->getLanguageId();
 
         // fill b2b customer fields
         $customer->company = $command->getCompanyName();

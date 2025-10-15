@@ -87,7 +87,8 @@ class CustomerFormDataProviderTest extends TestCase
                     36.99,
                     10,
                     1,
-                    false
+                    false,
+                    1
                 )
             )
         ;
@@ -135,6 +136,7 @@ class CustomerFormDataProviderTest extends TestCase
             'group_ids' => [1, 2, 3],
             'default_group_id' => 3,
             'is_guest' => false,
+            'language_id' => 1,
         ], $customerFormDataProvider->getData(1));
     }
 
@@ -165,6 +167,7 @@ class CustomerFormDataProviderTest extends TestCase
             'max_payment_days' => 10,
             'risk_id' => 1,
             'is_guest' => false,
+            'language_id' => 1,
         ], $customerFormDataProvider->getData(1));
     }
 
