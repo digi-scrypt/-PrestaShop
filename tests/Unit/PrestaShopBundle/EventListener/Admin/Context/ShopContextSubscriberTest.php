@@ -548,7 +548,7 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
     {
         $router = $this->createMock(RouterInterface::class);
         $router
-            ->method('match')
+            ->method('matchRequest')
             ->willThrowException(new NoConfigurationException())
         ;
 
