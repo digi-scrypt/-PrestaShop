@@ -24,23 +24,11 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-namespace PrestaShop\PrestaShop\Adapter\Support;
+namespace PrestaShop\PrestaShop\Core\Domain\Contact\CommandHandler;
 
-use PrestaShop\PrestaShop\Adapter\Entity\Contact;
-use PrestaShop\PrestaShop\Core\Support\ContactRepositoryInterface;
+use PrestaShop\PrestaShop\Core\Domain\Contact\Command\DeleteContactCommand;
 
-/**
- * Class ContactRepository is responsible for retrieving contact data from database.
- *
- * @internal
- */
-final class ContactRepository implements ContactRepositoryInterface
+interface DeleteContactHandlerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function findAllByLangId($langId)
-    {//TODO <cnc-notice> capire se può essere rimosso e sostituito con il repository che ho creato
-        return Contact::getContacts($langId);
-    }
+    public function handle(DeleteContactCommand $command): void;
 }
