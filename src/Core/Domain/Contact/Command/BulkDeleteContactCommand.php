@@ -23,24 +23,34 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
+declare(strict_types=1);
 
-namespace PrestaShop\PrestaShop\Adapter\Support;
+namespace PrestaShop\PrestaShop\Core\Domain\Contact\Command;
 
-use PrestaShop\PrestaShop\Adapter\Entity\Contact;
-use PrestaShop\PrestaShop\Core\Support\ContactRepositoryInterface;
+use PrestaShop\PrestaShop\Core\Domain\Contact\ValueObject\ContactId;
 
-/**
- * Class ContactRepository is responsible for retrieving contact data from database.
- *
- * @internal
- */
-final class ContactRepository implements ContactRepositoryInterface
+class BulkDeleteContactCommand
 {
     /**
-     * {@inheritdoc}
+     * @var ContactId[]
      */
-    public function findAllByLangId($langId)
+    private $contactIds;
+
+    /**
+     * @param int[] $contactIds
+     */
+    public function __construct(array $contactIds)
     {
-        return Contact::getContacts($langId);
+        foreach ($contactIds as $contactId) {
+            $this->contactIds[] = new ContactId($contactId);
+        }
+    }
+
+    /**
+     * @return ContactId[]
+     */
+    public function getContactIds(): array
+    {
+        return $this->contactIds;
     }
 }

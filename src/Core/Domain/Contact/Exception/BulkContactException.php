@@ -23,24 +23,43 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
+declare(strict_types=1);
 
-namespace PrestaShop\PrestaShop\Adapter\Support;
+namespace PrestaShop\PrestaShop\Core\Domain\Contact\Exception;
 
-use PrestaShop\PrestaShop\Adapter\Entity\Contact;
-use PrestaShop\PrestaShop\Core\Support\ContactRepositoryInterface;
+use PrestaShop\PrestaShop\Core\Domain\Exception\BulkCommandExceptionInterface;
+use Throwable;
 
-/**
- * Class ContactRepository is responsible for retrieving contact data from database.
- *
- * @internal
- */
-final class ContactRepository implements ContactRepositoryInterface
+class BulkContactException extends ContactException implements BulkCommandExceptionInterface
 {
+    public const FAILED_BULK_DELETE = 1;
+
     /**
-     * {@inheritdoc}
+     * @var Throwable[]
      */
-    public function findAllByLangId($langId)
+    private $exceptions;
+
+    /**
+     * @param Throwable[] $exceptions
+     * @param string $message
+     * @param int $code
+     * @param Throwable|null $previous
+     */
+    public function __construct(
+        array $exceptions,
+        string $message = 'Errors occurred during Contact bulk action',
+        int $code = 0,
+        ?Throwable $previous = null
+    ) {
+        $this->exceptions = $exceptions;
+        parent::__construct($message, $code, $previous);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getExceptions(): array
     {
-        return Contact::getContacts($langId);
+        return $this->exceptions;
     }
 }
