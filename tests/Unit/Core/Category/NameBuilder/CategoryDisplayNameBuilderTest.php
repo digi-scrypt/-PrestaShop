@@ -33,6 +33,7 @@ use PrestaShop\PrestaShop\Core\Category\NameBuilder\CategoryDisplayNameBuilder;
 use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\CategoryId;
 use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 
 class CategoryDisplayNameBuilderTest extends TestCase
 {
@@ -55,8 +56,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
             new ShopId(1),
             new LanguageId(1),
             new CategoryId($categoryId),
-            // cannot use cache because legacy Cache is not found by units
-            false
+            true
         );
 
         $this->assertSame($expectedResult, $actualResult);
@@ -69,7 +69,9 @@ class CategoryDisplayNameBuilderTest extends TestCase
     {
         $categoryRepositoryMock = $this->mockRepository([]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $cache = new NullAdapter();
+
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -80,7 +82,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
 
         $categoryRepositoryMock = $this->mockRepository([2 => ['Home'], 3 => ['Home']]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -95,7 +97,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
             5 => ['Clothes', 'Accessories'],
         ]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -111,7 +113,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
             6 => ['Clothes', 'Accessories', 'Accessories'],
         ]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -128,7 +130,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
             7 => ['Clothes', 'Accessories', 'Accessories'],
         ]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -144,7 +146,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
             7 => ['Home', 'Clothes', 'Home', 'Clothes'],
         ]);
         $separator = ' > ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
@@ -154,7 +156,7 @@ class CategoryDisplayNameBuilderTest extends TestCase
         ];
 
         $separator = ' + ';
-        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator);
+        $builder = new CategoryDisplayNameBuilder($categoryRepositoryMock, $separator, $cache);
 
         yield [
             $builder,
