@@ -69,6 +69,7 @@ use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
 use PrestaShopBundle\Form\Admin\Sell\Category\DeleteCategoriesType;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShopBundle\Security\Attribute\DemoRestricted;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -263,6 +264,8 @@ class CategoryController extends PrestaShopAdminController
         FormHandlerInterface $categoryFormHandler,
         #[Autowire(service: 'prestashop.adapter.group.provider.default_groups_provider')]
         DefaultGroupsProviderInterface $defaultGroupsProvider,
+        #[Autowire(service: 'prestashop.core.category.cache.adapter')]
+        FilesystemAdapter $cache,
     ): Response {
         try {
             /** @var EditableCategory $editableCategory */
@@ -295,6 +298,8 @@ class CategoryController extends PrestaShopAdminController
             $handlerResult = $categoryFormHandler->handleFor((int) $categoryId, $categoryForm);
 
             if ($handlerResult->isSubmitted() && $handlerResult->isValid()) {
+                $cache->clear();
+
                 $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_categories_index', [
