@@ -541,7 +541,8 @@ CREATE TABLE `PREFIX_connections` (
   PRIMARY KEY (`id_connections`),
   KEY `id_guest` (`id_guest`),
   KEY `date_add` (`date_add`),
-  KEY `id_page` (`id_page`)
+  KEY `id_page` (`id_page`),
+  KEY `id_guestdateadd` (`id_guest`, `date_add`),
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
 /* User connection pages log. See PS_STATSDATA_CUSTOMER_PAGESVIEWS variable */
