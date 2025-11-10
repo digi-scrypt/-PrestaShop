@@ -1740,6 +1740,7 @@ CREATE TABLE IF NOT EXISTS `PREFIX_product_shop` (
   KEY `indexed` (
     `indexed`, `active`, `id_product`
   ),
+  KEY `id_shop` (`id_shop`),
   INDEX `shop_tax` (`id_shop`, `id_tax_rules_group`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
