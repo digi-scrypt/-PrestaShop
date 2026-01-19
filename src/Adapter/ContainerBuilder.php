@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Adapter;
 
+use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\ServiceRepositoryCompilerPass;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
@@ -186,6 +187,7 @@ class ContainerBuilder
 
         $container->addCompilerPass(new LoadServicesFromModulesPass($this->containerName), PassConfig::TYPE_BEFORE_OPTIMIZATION, PrestaShopBundle::LOAD_MODULE_SERVICES_PASS_PRIORITY);
         $container->addCompilerPass(new LegacyCompilerPass());
+        $container->addCompilerPass(new ServiceRepositoryCompilerPass());
 
         // Build extensions
         $builderExtensions = [
