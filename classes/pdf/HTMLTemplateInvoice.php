@@ -243,7 +243,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                 foreach ($shipmentProducts as $shipmentProduct) {
                     $orderDetailToShipmentMap[$shipmentProduct->getOrderDetailId()] = [
                         'shipment' => $shipment,
-                        'products' => $shipmentProduct,
                     ];
                 }
             }
@@ -254,20 +253,13 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $order_details = $sorter->natural($order_details, Sorter::ORDER_DESC, 'product_reference', 'product_supplier_reference');
 
         if ($isMultishipmentEnabled && !empty($orderDetailToShipmentMap)) {
-            foreach ($order_details as &$order_detail) {
-                if (isset($orderDetailToShipmentMap[$order_detail['id_order_detail']])) {
-                    $order_detail['shipmentId'] = $orderDetailToShipmentMap[$order_detail['id_order_detail']]['shipment']->getId();
-                    $order_detail['shipment'] = $orderDetailToShipmentMap[$order_detail['id_order_detail']]['shipment'];
-                }
-            }
-            unset($order_detail);
-
             foreach ($order_details as $order_detail) {
-                if (isset($order_detail['shipmentId']) && isset($order_detail['shipment'])) {
-                    $shipmentId = $order_detail['shipmentId'];
-                    $productsByShipment[$shipmentId]['products'][] = $order_detail;
-                    $productsByShipment[$shipmentId]['carrierName'] = $order_detail['shipment']->getCarrierSummary()->getName();
-                    $productsByShipment[$shipmentId]['trackingNumber'] = $order_detail['shipment']->getTrackingNumber();
+                if (isset($orderDetailToShipmentMap[$order_detail['id_order_detail']])) {
+                    $shipment = $orderDetailToShipmentMap[$order_detail['id_order_detail']]['shipment'];
+                    $shipmentId = $shipment->getId();
+                    $productsByShipment['physical_products'][$shipmentId]['products'][] = $order_detail;
+                    $productsByShipment['physical_products'][$shipmentId]['carrierName'] = $shipment->getCarrierSummary()->getName();
+                    $productsByShipment['physical_products'][$shipmentId]['trackingNumber'] = $shipment->getTrackingNumber();
                 } elseif ($order_detail['is_virtual']) {
                     $productsByShipment['virtual_products']['products'][] = $order_detail;
                 }
