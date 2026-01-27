@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Image;
 
+use Imagick;
 use PrestaShop\PrestaShop\Core\Image\Exception\AvifUnavailableException;
 
 /**
@@ -45,7 +46,7 @@ class AvifExtensionChecker
 
         // Check Imagick first — it has broader AVIF support and better quality
         if (extension_loaded('imagick')) {
-            $imagick = new \Imagick();
+            $imagick = new Imagick();
             $this->isAvailable = in_array('AVIF', $imagick->queryFormats('AVIF'));
 
             if ($this->isAvailable) {

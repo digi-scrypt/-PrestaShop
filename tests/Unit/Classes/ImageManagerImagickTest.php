@@ -28,7 +28,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Classes;
 
+use Configuration;
+use ImageManager;
+use Imagick;
+use ImagickPixel;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * @requires extension imagick
@@ -45,8 +51,8 @@ class ImageManagerImagickTest extends TestCase
 
         // Create a small 10x10 PNG fixture using Imagick
         $this->fixtureFile = $this->outputDir . '/fixture.png';
-        $img = new \Imagick();
-        $img->newImage(10, 10, new \ImagickPixel('red'));
+        $img = new Imagick();
+        $img->newImage(10, 10, new ImagickPixel('red'));
         $img->setImageFormat('png');
         $img->writeImage($this->fixtureFile);
         $img->destroy();
@@ -55,7 +61,7 @@ class ImageManagerImagickTest extends TestCase
         if (!defined('_DB_PREFIX_')) {
             define('_DB_PREFIX_', 'ps_');
         }
-        $ref = new \ReflectionClass(\Configuration::class);
+        $ref = new ReflectionClass(Configuration::class);
         $initialized = $ref->getProperty('_initialized');
         $initialized->setAccessible(true);
         $initialized->setValue(null, true);
@@ -92,7 +98,7 @@ class ImageManagerImagickTest extends TestCase
         }
 
         // Reset Configuration statics
-        $ref = new \ReflectionClass(\Configuration::class);
+        $ref = new ReflectionClass(Configuration::class);
         $initialized = $ref->getProperty('_initialized');
         $initialized->setAccessible(true);
         $initialized->setValue(null, false);
@@ -100,12 +106,12 @@ class ImageManagerImagickTest extends TestCase
 
     public function testIsImagickAvailableReturnsTrue(): void
     {
-        self::assertTrue(\ImageManager::isImagickAvailable());
+        self::assertTrue(ImageManager::isImagickAvailable());
     }
 
     public function testCalculateResizeDimensions(): void
     {
-        $method = new \ReflectionMethod(\ImageManager::class, 'calculateResizeDimensions');
+        $method = new ReflectionMethod(ImageManager::class, 'calculateResizeDimensions');
         $method->setAccessible(true);
 
         $result = $method->invoke(null, 100, 200, 50, 100);
@@ -118,7 +124,7 @@ class ImageManagerImagickTest extends TestCase
 
     public function testCalculateResizeDimensionsWithNullDestination(): void
     {
-        $method = new \ReflectionMethod(\ImageManager::class, 'calculateResizeDimensions');
+        $method = new ReflectionMethod(ImageManager::class, 'calculateResizeDimensions');
         $method->setAccessible(true);
 
         $result = $method->invoke(null, 100, 200, null, null);
@@ -134,11 +140,11 @@ class ImageManagerImagickTest extends TestCase
     {
         $output = $this->outputDir . '/output.' . $extension;
 
-        $imagick = new \Imagick();
-        $imagick->newImage(5, 5, new \ImagickPixel('green'));
+        $imagick = new Imagick();
+        $imagick->newImage(5, 5, new ImagickPixel('green'));
         $imagick->setImageFormat($extension === 'jpg' ? 'jpeg' : $extension);
 
-        $method = new \ReflectionMethod(\ImageManager::class, 'writeImagick');
+        $method = new ReflectionMethod(ImageManager::class, 'writeImagick');
         $method->setAccessible(true);
 
         $result = $method->invoke(null, $type, $imagick, $output);
@@ -160,7 +166,7 @@ class ImageManagerImagickTest extends TestCase
 
     public function testWriteImagickAvif(): void
     {
-        $imagick = new \Imagick();
+        $imagick = new Imagick();
         $formats = $imagick->queryFormats('AVIF');
         $imagick->destroy();
 
@@ -170,11 +176,11 @@ class ImageManagerImagickTest extends TestCase
 
         $output = $this->outputDir . '/output.avif';
 
-        $imagick = new \Imagick();
-        $imagick->newImage(5, 5, new \ImagickPixel('green'));
+        $imagick = new Imagick();
+        $imagick->newImage(5, 5, new ImagickPixel('green'));
         $imagick->setImageFormat('png');
 
-        $method = new \ReflectionMethod(\ImageManager::class, 'writeImagick');
+        $method = new ReflectionMethod(ImageManager::class, 'writeImagick');
         $method->setAccessible(true);
 
         $result = $method->invoke(null, 'avif', $imagick, $output);
@@ -187,11 +193,11 @@ class ImageManagerImagickTest extends TestCase
     {
         $output = $this->outputDir . '/output_jpeg.jpg';
 
-        $imagick = new \Imagick();
-        $imagick->newImage(10, 10, new \ImagickPixel('blue'));
+        $imagick = new Imagick();
+        $imagick->newImage(10, 10, new ImagickPixel('blue'));
         $imagick->setImageFormat('jpeg');
 
-        $method = new \ReflectionMethod(\ImageManager::class, 'writeImagick');
+        $method = new ReflectionMethod(ImageManager::class, 'writeImagick');
         $method->setAccessible(true);
         $result = $method->invoke(null, 'jpg', $imagick, $output);
 
@@ -205,11 +211,11 @@ class ImageManagerImagickTest extends TestCase
 
     public function testGetImagickSourceFileType(): void
     {
-        $method = new \ReflectionMethod(\ImageManager::class, 'getImagickSourceFileType');
+        $method = new ReflectionMethod(ImageManager::class, 'getImagickSourceFileType');
         $method->setAccessible(true);
 
-        $img = new \Imagick();
-        $img->newImage(1, 1, new \ImagickPixel('white'));
+        $img = new Imagick();
+        $img->newImage(1, 1, new ImagickPixel('white'));
 
         $img->setImageFormat('png');
         self::assertSame(IMAGETYPE_PNG, $method->invoke(null, $img));
@@ -229,16 +235,16 @@ class ImageManagerImagickTest extends TestCase
     public function testAutoOrientResetsOrientation(): void
     {
         // Create a non-square image and set a non-default orientation
-        $img = new \Imagick();
-        $img->newImage(20, 10, new \ImagickPixel('blue'));
+        $img = new Imagick();
+        $img->newImage(20, 10, new ImagickPixel('blue'));
         $img->setImageFormat('jpeg');
-        $img->setImageOrientation(\Imagick::ORIENTATION_RIGHTTOP);
+        $img->setImageOrientation(Imagick::ORIENTATION_RIGHTTOP);
 
-        self::assertSame(\Imagick::ORIENTATION_RIGHTTOP, $img->getImageOrientation());
+        self::assertSame(Imagick::ORIENTATION_RIGHTTOP, $img->getImageOrientation());
 
         // autoOrient() should rotate and reset the orientation to TOPLEFT
         $img->autoOrient();
-        self::assertSame(\Imagick::ORIENTATION_TOPLEFT, $img->getImageOrientation());
+        self::assertSame(Imagick::ORIENTATION_TOPLEFT, $img->getImageOrientation());
         // After rotating a 20x10 with orientation 6, dimensions should swap
         self::assertSame(10, $img->getImageWidth());
         self::assertSame(20, $img->getImageHeight());
