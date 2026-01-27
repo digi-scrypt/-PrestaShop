@@ -574,6 +574,12 @@
   <configuration id="PS_TOKEN_ENABLE" name="PS_TOKEN_ENABLE">
     <value>1</value>
   </configuration>
+  <configuration id="PS_B2C_MODE_ENABLE" name="PS_B2C_MODE_ENABLE">
+    <value>1</value>
+  </configuration>
+  <configuration id="PS_B2B_MODE_ENABLE" name="PS_B2B_MODE_ENABLE">
+    <value>0</value>
+  </configuration>
   <configuration id="PS_STATS_RENDER" name="PS_STATS_RENDER">
     <value>graphnvd3</value>
   </configuration>
@@ -922,9 +928,6 @@ Country</value>
       <value>name</value>
     </configuration>
     <configuration id="PS_MIN_LOGGER_LEVEL_IN_DB" name="PS_MIN_LOGGER_LEVEL_IN_DB">
-      <value>1</value>
-    </configuration>
-    <configuration id="PS_B2C_ENABLE" name="PS_B2C_ENABLE">
       <value>1</value>
     </configuration>
     <configuration id="PS_IMPROVED_B2B_ENABLE" name="PS_IMPROVED_B2B_ENABLE">

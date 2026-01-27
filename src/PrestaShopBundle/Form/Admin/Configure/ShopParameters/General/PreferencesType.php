@@ -15,6 +15,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use PrestaShop\PrestaShop\Core\Security\Permission;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 
 /**
  * Class returning the content of the form in the maintenance page.
@@ -45,6 +48,10 @@ class PreferencesType extends TranslatorAwareType
      * @var RequestStack
      */
     private $requestStack;
+    
+    private $authorizationChecker;
+    
+    private $featureFlag;
 
     /**
      * @param TranslatorInterface $translator
@@ -53,15 +60,18 @@ class PreferencesType extends TranslatorAwareType
      * @param bool $isShopFeatureEnabled
      * @param bool $isSingleShopContext
      * @param bool $isAllShopContext
+     * @param bool $featureFlag
      */
     public function __construct(
         RequestStack $requestStack,
         TranslatorInterface $translator,
         array $locales,
         ConfigurationInterface $configuration,
+        AuthorizationCheckerInterface $authorizationChecker,
         bool $isShopFeatureEnabled,
         bool $isSingleShopContext,
-        bool $isAllShopContext
+        bool $isAllShopContext,
+        FeatureFlagStateCheckerInterface $featureFlag
     ) {
         parent::__construct($translator, $locales);
 
@@ -70,6 +80,8 @@ class PreferencesType extends TranslatorAwareType
         $this->isAllShopContext = $isAllShopContext;
         $this->configuration = $configuration;
         $this->requestStack = $requestStack;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->featureFlag = $featureFlag;
     }
 
     /**
@@ -78,7 +90,15 @@ class PreferencesType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $configuration = $this->configuration;
-
+        
+        $currentLegacyController = $this->requestStack->getCurrentRequest()->attributes->get('_legacy_controller');
+        $currentEmployeeHasNecessaryRights = $this->authorizationChecker->isGranted(
+            Permission::UPDATE,
+            $currentLegacyController
+        );
+        
+        $showB2bToggles = $this->featureFlag->isEnabled('improved_b2b');
+        
         if ($this->requestStack->getCurrentRequest()->isSecure()) {
             $builder->add('enable_ssl', SwitchType::class, [
                 'label' => $this->trans('Enable SSL', 'Admin.Shopparameters.Feature'),
@@ -100,7 +120,29 @@ class PreferencesType extends TranslatorAwareType
                     'Enable or disable token in the Front Office to improve PrestaShop\'s security.',
                     'Admin.Shopparameters.Help'
                 ),
-            ])
+            ]);
+        
+        if ($showB2bToggles) {
+            $builder
+                ->add('enable_b2c_mode', SwitchType::class, [
+                    'disabled' => !$currentEmployeeHasNecessaryRights,
+                    'label' => $this->trans('Enable b2c mode (by default)', 'Admin.Shopparameters.Feature'),
+                    'help' => $this->trans(
+                        'The B2c model allows a client to order for themselves',
+                        'Admin.Shopparameters.Help'
+                    ),
+                ])
+                ->add('enable_b2b_mode', SwitchType::class, [
+                    'disabled' => !$currentEmployeeHasNecessaryRights,
+                    'label' => $this->trans('Enable improved b2b mode', 'Admin.Shopparameters.Feature'),
+                    'help' => $this->trans(
+                        'The B2B model allows a client to order for different business entities.',
+                        'Admin.Shopparameters.Help'
+                    ),
+                ]);
+        }
+        
+        $builder
             ->add('allow_html_iframes', SwitchType::class, [
                 'label' => $this->trans(
                     'Allow iframes on HTML fields',

@@ -47,3 +47,8 @@
   {% endblock %}
   {{ form_end(generalForm) }}
 {% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('themes/new-theme/public/shop_modes.bundle.js') }}"></script>
+{% endblock %}

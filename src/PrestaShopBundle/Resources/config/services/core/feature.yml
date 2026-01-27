@@ -4,4 +4,3 @@ services:
     autowire: true
 
   PrestaShop\PrestaShop\Core\Feature\ImprovedB2bFeature: ~
-  PrestaShop\PrestaShop\Core\Feature\B2cFeature: ~

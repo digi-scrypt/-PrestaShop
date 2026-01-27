@@ -15,86 +15,122 @@
  */
 enum SwitchContainer {
   B2C,
-  IMPROVED_B2B,
+  B2B,
 }
 
 class ShopModes {
   private readonly b2cContainer: HTMLElement | null;
-  private readonly improvedB2bContainer: HTMLElement | null;
-  private readonly b2cSwitch: NodeListOf<HTMLInputElement>;
-  private readonly improvedB2bSwitch: NodeListOf<HTMLInputElement>;
-  private isB2cEnabled: boolean = false;
-  private isImprovedB2BEnabled: boolean = false;
+  private readonly b2bContainer: HTMLElement | null;
+  private readonly b2cInputs: HTMLInputElement[];
+  private readonly b2bInputs: HTMLInputElement[];
 
   constructor() {
-    this.b2cContainer = document.getElementById('form_enable_b2c_feature')?.closest('.input-container') ?? null;
-    this.b2cSwitch = document.querySelectorAll('input[name="form[enable_b2c_feature]"]') as NodeListOf<HTMLInputElement>;
-    this.improvedB2bContainer = document.getElementById('form_enable_improved_b2b_feature')?.closest('.input-container') ?? null;
-    this.improvedB2bSwitch = document.querySelectorAll('input[name="form[enable_improved_b2b_feature]"]') as NodeListOf<HTMLInputElement>;
+    this.b2cContainer = document.getElementById('form_enable_b2c_mode')?.closest('.input-container') ?? null;
+    this.b2bContainer = document.getElementById('form_enable_b2b_mode')?.closest('.input-container') ?? null;
+
+    this.b2cInputs = Array.from(
+      document.querySelectorAll('input[name="form[enable_b2c_mode]"]') as NodeListOf<HTMLInputElement>,
+    );
+    this.b2bInputs = Array.from(
+      document.querySelectorAll('input[name="form[enable_b2b_mode]"]') as NodeListOf<HTMLInputElement>,
+    );
+
     this.init();
   }
 
   private init(): void {
+    if (!this.hasBothSwitches()) {
+      return;
+    }
+
     this.attachEventListeners();
-    console.log(this.isB2cEnabled, this.isImprovedB2BEnabled);
     this.updateToggleStates();
+    this.preventAllOffOnSubmit();
+  }
+
+  private hasBothSwitches(): boolean {
+    return (
+      this.b2cContainer !== null &&
+      this.b2bContainer !== null &&
+      this.b2cInputs.length > 0 &&
+      this.b2bInputs.length > 0
+    );
   }
 
   private attachEventListeners(): void {
-    this.b2cSwitch.forEach(input => {
-      if (input.checked && input.value === '1') {
-        this.isB2cEnabled = true;
-      }
-      input.addEventListener('change', (event: Event) => {
-        const target = event.target as HTMLInputElement;
-        this.isB2cEnabled = target.value === '1';
-        this.updateToggleStates();
-      });
+    this.b2cInputs.forEach((input) => {
+      input.addEventListener('change', () => this.updateToggleStates());
     });
-    this.improvedB2bSwitch.forEach(input => {
-      if (input.checked && input.value === '1') {
-        this.isImprovedB2BEnabled = true;
-      }
-      input.addEventListener('change', (event: Event) => {
-        const target = event.target as HTMLInputElement;
-        this.isImprovedB2BEnabled = target.value === '1';
-        this.updateToggleStates();
-      });
+
+    this.b2bInputs.forEach((input) => {
+      input.addEventListener('change', () => this.updateToggleStates());
     });
+  }
+
+  private isEnabled(inputs: HTMLInputElement[]): boolean {
+    return inputs.some((input) => input.checked && input.value === '1');
+  }
+
+  private setEnabled(inputs: HTMLInputElement[], enabled: boolean): void {
+    const valueToCheck = enabled ? '1' : '0';
+    inputs.forEach((input) => {
+      input.checked = input.value === valueToCheck;
+    });
+    inputs.forEach((input) => input.dispatchEvent(new Event('change', { bubbles: true })));
   }
 
   private updateToggleStates(): void {
-    const readOnlyB2c = this.isB2cEnabled && !this.isImprovedB2BEnabled;
-    const readOnlyB2b = !this.isB2cEnabled && this.isImprovedB2BEnabled;
+    const b2cEnabled = this.isEnabled(this.b2cInputs);
+    const b2bEnabled = this.isEnabled(this.b2bInputs);
 
-    this.setToggleReadOnly(SwitchContainer.B2C, readOnlyB2c);
-    this.setToggleReadOnly(SwitchContainer.IMPROVED_B2B, readOnlyB2b);
+    const lockB2c = b2cEnabled && !b2bEnabled;
+    const lockB2b = !b2cEnabled && b2bEnabled;
+
+    this.setToggleReadOnly(SwitchContainer.B2C, lockB2c);
+    this.setToggleReadOnly(SwitchContainer.B2B, lockB2b);
+
+    if (!b2cEnabled && !b2bEnabled) {
+      this.setEnabled(this.b2cInputs, true);
+    }
   }
 
   private setToggleReadOnly(switchContainer: SwitchContainer, disabled: boolean): void {
-    let container = null;
-    let switchElement = null;
+    let container: HTMLElement | null = null;
+    let inputs: HTMLInputElement[] | null = null;
 
     switch (switchContainer) {
       case SwitchContainer.B2C:
         container = this.b2cContainer;
-        switchElement = this.b2cSwitch;
+        inputs = this.b2cInputs;
         break;
-      case SwitchContainer.IMPROVED_B2B:
-        container = this.improvedB2bContainer;
-        switchElement = this.improvedB2bSwitch;
+      case SwitchContainer.B2B:
+        container = this.b2bContainer;
+        inputs = this.b2bInputs;
         break;
       default:
         return;
     }
 
-    if (container === null || switchElement === null) {
+    if (container === null || inputs === null) {
+      return;
+    }
+  }
+
+  private preventAllOffOnSubmit(): void {
+    const form = document.getElementById('configuration_form') as HTMLFormElement | null;
+    if (!form) {
       return;
     }
 
-    container.classList.toggle('disabled', disabled);
-    switchElement.forEach(input => {
-      input.style.pointerEvents = disabled ? 'none' : '';
+    form.addEventListener('submit', (e) => {
+      const b2cEnabled = this.isEnabled(this.b2cInputs);
+      const b2bEnabled = this.isEnabled(this.b2bInputs);
+
+      if (!b2cEnabled && !b2bEnabled) {
+        e.preventDefault();
+        this.setEnabled(this.b2cInputs, true);
+        alert('At least one mode must be enabled (B2C or B2B).');
+      }
     });
   }
 }

@@ -9,6 +9,7 @@ namespace PrestaShop\PrestaShop\Adapter\Preferences;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Http\CookieOptions;
+use PrestaShop\PrestaShop\Core\Context\EmployeeContext;
 
 /**
  * This class will provide Shop Preferences configuration.
@@ -19,11 +20,18 @@ class PreferencesConfiguration implements DataConfigurationInterface
      * @var Configuration
      */
     private $configuration;
+    
+    /**
+     * @var EmployeeContext
+     */
+    private $employeeContext;
 
     public function __construct(
-        Configuration $configuration
+        Configuration $configuration,
+        EmployeeContext $employeeContext
     ) {
         $this->configuration = $configuration;
+        $this->employeeContext = $employeeContext;
     }
 
     /**
@@ -34,6 +42,8 @@ class PreferencesConfiguration implements DataConfigurationInterface
         return [
             'enable_ssl' => $this->configuration->getBoolean('PS_SSL_ENABLED'),
             'enable_token' => $this->configuration->getBoolean('PS_TOKEN_ENABLE'),
+            'enable_b2c_mode' => $this->configuration->getBoolean('PS_B2C_MODE_ENABLE'),
+            'enable_b2b_mode' => $this->configuration->getBoolean('PS_B2B_MODE_ENABLE'),
             'allow_html_iframes' => $this->configuration->getBoolean('PS_ALLOW_HTML_IFRAME'),
             'use_htmlpurifier' => $this->configuration->getBoolean('PS_USE_HTMLPURIFIER'),
             'price_round_mode' => $this->configuration->get('PS_PRICE_ROUND_MODE'),
@@ -70,8 +80,54 @@ class PreferencesConfiguration implements DataConfigurationInterface
             ];
         }
 
+        $newB2c = (bool) $configuration['enable_b2c_mode'];
+        $newB2b = (bool) $configuration['enable_b2b_mode'];
+        
+        if (!$newB2c && !$newB2b) {
+            return [[
+                'key' => 'At least one mode must be enabled (B2C or B2B).',
+                'domain' => 'Admin.Notifications.Warning',
+                'parameters' => [],
+            ]];
+        }
+        
+        $oldB2c = $this->configuration->getBoolean('PS_B2C_MODE_ENABLE');
+        $oldB2b = $this->configuration->getBoolean('PS_B2B_MODE_ENABLE');
+
+        $b2cChanged = ($oldB2c !== $newB2c);
+        $b2bChanged = ($oldB2b !== $newB2b);
+
+        if ($b2cChanged || $b2bChanged) {
+            $employee = $this->employeeContext->getEmployee();
+            $employeeId = $employee ? (int) $employee->getId() : 0;
+
+            $payload = [
+                'employee_id' => $employeeId,
+                'datetime' => (new \DateTimeImmutable())->format(DATE_ATOM),
+                'changes' => [],
+            ];
+
+            if ($b2cChanged) {
+                $payload['changes']['PS_B2C_MODE_ENABLE'] = ['old' => $oldB2c ? 1 : 0, 'new' => $newB2c ? 1 : 0];
+            }
+            if ($b2bChanged) {
+                $payload['changes']['PS_B2B_MODE_ENABLE'] = ['old' => $oldB2b ? 1 : 0, 'new' => $newB2b ? 1 : 0];
+            }
+
+            \PrestaShopLogger::addLog(
+                'B2C/B2B modes updated: ' . json_encode($payload, JSON_UNESCAPED_UNICODE),
+                1,
+                null,
+                'Configuration',
+                0,
+                true
+            );
+        }
+
         $this->configuration->set('PS_SSL_ENABLED', $configuration['enable_ssl']);
         $this->configuration->set('PS_TOKEN_ENABLE', $configuration['enable_token']);
+        $this->configuration->set('PS_B2C_MODE_ENABLE', $configuration['enable_b2c_mode']);
+        $this->configuration->set('PS_B2B_MODE_ENABLE', $configuration['enable_b2b_mode']);
         $this->configuration->set('PS_ALLOW_HTML_IFRAME', $configuration['allow_html_iframes']);
         $this->configuration->set('PS_USE_HTMLPURIFIER', $configuration['use_htmlpurifier']);
         $this->configuration->set('PS_PRICE_ROUND_MODE', $configuration['price_round_mode']);
@@ -105,6 +161,8 @@ class PreferencesConfiguration implements DataConfigurationInterface
         return isset(
             $configuration['enable_ssl'],
             $configuration['enable_token'],
+            $configuration['enable_b2c_mode'],
+            $configuration['enable_b2b_mode'],
             $configuration['allow_html_iframes'],
             $configuration['use_htmlpurifier'],
             $configuration['price_round_mode'],
