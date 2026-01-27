@@ -98,4 +98,10 @@ class ImageManagerTest extends TestCase
             ['file', 'image/jpeg'],
         ];
     }
+
+    public function testIsImagickAvailableReturnsBool(): void
+    {
+        $result = ImageManager::isImagickAvailable();
+        self::assertIsBool($result);
+    }
 }
