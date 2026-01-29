@@ -13,10 +13,6 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-enum SwitchContainer {
-  B2C,
-  B2B,
-}
 
 class Preferences {
   private readonly b2cContainer: HTMLElement | null;
@@ -71,44 +67,40 @@ class Preferences {
   }
 
   private isEnabled(inputs: HTMLInputElement[]): boolean {
-    return inputs.some((input) => input.checked && input.value === '1');
+    return inputs.some((el) => el.checked && el.value === '1');
   }
 
   private setEnabled(inputs: HTMLInputElement[], enabled: boolean): void {
     const valueToCheck = enabled ? '1' : '0';
-    inputs.forEach((input) => {
-      input.checked = input.value === valueToCheck;
-    });
-    inputs.forEach((input) => input.dispatchEvent(new Event('change', {bubbles: true})));
+
+    for (let i = 0; i < inputs.length; i += 1) {
+      const el = inputs[i];
+      el.checked = el.value === valueToCheck;
+    }
+
+    for (let i = 0; i < inputs.length; i += 1) {
+      inputs[i].dispatchEvent(new Event('change', {bubbles: true}));
+    }
   }
 
   private updateToggleStates(): void {
     const b2cEnabled = this.isEnabled(this.b2cInputs);
     const b2bEnabled = this.isEnabled(this.b2bInputs);
 
-    this.setToggleReadOnly(SwitchContainer.B2C);
-    this.setToggleReadOnly(SwitchContainer.B2B);
+    this.setToggleReadOnly(this.b2cInputs, b2cEnabled && !b2bEnabled);
+
+    this.setToggleReadOnly(this.b2bInputs, b2bEnabled && !b2cEnabled);
 
     if (!b2cEnabled && !b2bEnabled) {
       this.setEnabled(this.b2cInputs, true);
     }
   }
 
-  private setToggleReadOnly(switchContainer: SwitchContainer): void {
-    let container: HTMLElement | null = null;
-    let inputs: HTMLInputElement[] | null = null;
-
-    switch (switchContainer) {
-      case SwitchContainer.B2C:
-        container = this.b2cContainer;
-        inputs = this.b2cInputs;
-        break;
-      case SwitchContainer.B2B:
-        container = this.b2bContainer;
-        inputs = this.b2bInputs;
-        break;
-      default:
-        return;
+  private setToggleReadOnly(inputs: HTMLInputElement[], preventTurningOff: boolean): void {
+    for (let i = 0; i < inputs.length; i += 1) {
+      const el = inputs[i];
+      const isOffOption = el.value === '0';
+      el.disabled = preventTurningOff && isOffOption;
     }
   }
 
