@@ -38,7 +38,9 @@ $(() => {
       'ToggleChildrenChoice',
       'GeneratableInput',
       'ChoiceTree',
+      'ChoiceTable',
       'EventEmitter',
+      'DisablingSwitch',
     ],
   );
 
@@ -46,11 +48,9 @@ $(() => {
   new SpecificProducts();
 
   // Initialize customer search for single customer eligibility
-  const customerSearchContainer = '#discount_customer_eligibility_eligibility_single_customer';
-
-  if ($(customerSearchContainer).length > 0) {
+  if ($(DiscountMap.customerSearchContainer).length > 0) {
     new CustomerSearchInput(
-      customerSearchContainer,
+      DiscountMap.customerSearchContainer,
       '.js-customer-item',
       () => null,
     );
@@ -81,7 +81,19 @@ $(() => {
     if (radio.value === 'carriers') {
       $(DiscountMap.carriersSelect).trigger('change');
     }
+    if (radio.value === 'single_customer') {
+      $(DiscountMap.quantityPerCustomerInput).parents('.form-group').hide();
+    }
+    if (radio.value === 'customer_groups' || radio.value === 'all_customers') {
+      $(DiscountMap.quantityPerCustomerInput).parents('.form-group').show();
+    }
   });
+
+  if ($(DiscountMap.customerEligibilityInput).find('input[type="radio"]:checked').attr('value') === 'single_customer') {
+    $(DiscountMap.quantityPerCustomerInput).parents('.form-group').hide();
+  } else {
+    $(DiscountMap.quantityPerCustomerInput).parents('.form-group').show();
+  }
 
   $(DiscountMap.countriesSelect).select2({
     templateResult: formatOption,
@@ -116,6 +128,6 @@ $(() => {
 
   new window.prestashop.component.ChoiceTree(DiscountMap.categoryTree);
 
-  initGroupedItemCollection('#discount_conditions_cart_conditions_product_segment_attributes', getAllAttributeGroups);
-  initGroupedItemCollection('#discount_conditions_cart_conditions_product_segment_features', getAllFeatureGroups);
+  initGroupedItemCollection(DiscountMap.productSegmentAttributes, getAllAttributeGroups);
+  initGroupedItemCollection(DiscountMap.productSegmentFeatures, getAllFeatureGroups);
 });
