@@ -2,6 +2,16 @@
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  *}
+{if $is_multishipment_enabled && count($products_by_shipment) > 0}
+	<table width="100%" cellpadding="4" cellspacing="0" style="margin-bottom: 5px;">
+		<tr>
+			<td style="font-weight: bold; font-size: 9pt; padding: 8px;">
+				{l s='Virtual product(s)' d='Shop.Pdf' pdf='true'}
+			</td>
+		</tr>
+	</table>
+{/if}
+
 <table class="product" width="100%" cellpadding="4" cellspacing="0">
 
   {assign var='widthColProduct' value=$layout.product.width}

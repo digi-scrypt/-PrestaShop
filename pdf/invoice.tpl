@@ -38,7 +38,15 @@
 		<td colspan="12">
 
 			{if $is_multishipment_enabled && count($products_by_shipment) > 0}
-				{$shipment_tab}
+				{foreach $products_by_shipment['physical_products'] item=$shipment name="shipments_loop"}
+					{include file="./invoice.shipment-tab.tpl" shipment=$shipment current=$smarty.foreach.shipments_loop.iteration totalShipment=$smarty.foreach.shipments_loop.total}
+				{/foreach}
+
+				{if isset($products_by_shipment['virtual_products'])}
+					{foreach $products_by_shipment['virtual_products'] item=$products}
+						{include file="./invoice.product-tab.tpl" order_details=$products}
+					{/foreach}
+				{/if}
 			{else}
 				{$product_tab}
 			{/if}
@@ -73,14 +81,16 @@
 		<td colspan="12" height="10">&nbsp;</td>
 	</tr>
 
-	<tr>
-		<td colspan="6" class="left">
+	{if $cart_rules}
+		<tr>
+			<td colspan="6" class="left">
 
-			{$discount_tab}
+				{$discount_tab}
 
-		</td>
-		<td colspan="1">&nbsp;</td>
-	</tr>
+			</td>
+			<td colspan="1">&nbsp;</td>
+		</tr>
+	{/if}
 
 	<tr>
 		<td colspan="6" class="left">

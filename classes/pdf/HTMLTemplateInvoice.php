@@ -4,8 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentProducts;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipmentsWithProducts;
 use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Core\Util\Sorter;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
@@ -229,38 +228,42 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $isMultishipmentEnabled = $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT);
 
         $productsByShipment = [];
-        $orderDetailToShipmentMap = [];
-
-        if ($isMultishipmentEnabled) {
-            $queryBus = $containerFinder->getContainer()->get('prestashop.core.query_bus');
-
-            /** @var \PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipment[] $shipments */
-            $shipments = $queryBus->handle(new GetOrderShipments($this->order->id));
-
-            foreach ($shipments as $shipment) {
-                $shipmentProducts = $queryBus->handle(new GetShipmentProducts($shipment->getId()));
-
-                foreach ($shipmentProducts as $shipmentProduct) {
-                    $orderDetailToShipmentMap[$shipmentProduct->getOrderDetailId()] = [
-                        'shipment' => $shipment,
-                    ];
-                }
-            }
-        }
 
         // Sort products by Reference ID (and if equals (like combination) by Supplier Reference)
         $sorter = new Sorter();
         $order_details = $sorter->natural($order_details, Sorter::ORDER_DESC, 'product_reference', 'product_supplier_reference');
 
-        if ($isMultishipmentEnabled && !empty($orderDetailToShipmentMap)) {
+        if ($isMultishipmentEnabled) {
+            $queryBus = $containerFinder->getContainer()->get('prestashop.core.query_bus');
+
+            /** @var \PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentWithProducts[] $shipmentsWithProducts */
+            $shipmentsWithProducts = $queryBus->handle(new GetOrderShipmentsWithProducts($this->order->id));
+
+            $orderDetailToShipmentId = [];
+            foreach ($shipmentsWithProducts as $shipmentWithProducts) {
+                $shipmentId = $shipmentWithProducts->getShipmentId();
+
+                $productsByShipment['physical_products'][$shipmentId] = [
+                    'products' => [],
+                    'carrierName' => $shipmentWithProducts->getCarrierName(),
+                    'trackingNumber' => $shipmentWithProducts->getTrackingNumber(),
+                ];
+
+                foreach ($shipmentWithProducts->getOrderDetailIds() as $orderDetailId) {
+                    $orderDetailToShipmentId[$orderDetailId] = $shipmentId;
+                }
+            }
+
             foreach ($order_details as $order_detail) {
-                if (isset($orderDetailToShipmentMap[$order_detail['id_order_detail']])) {
-                    $shipment = $orderDetailToShipmentMap[$order_detail['id_order_detail']]['shipment'];
-                    $shipmentId = $shipment->getId();
+                $orderDetailId = $order_detail['id_order_detail'];
+
+                if (isset($orderDetailToShipmentId[$orderDetailId])) {
+                    $shipmentId = $orderDetailToShipmentId[$orderDetailId];
                     $productsByShipment['physical_products'][$shipmentId]['products'][] = $order_detail;
-                    $productsByShipment['physical_products'][$shipmentId]['carrierName'] = $shipment->getCarrierSummary()->getName();
-                    $productsByShipment['physical_products'][$shipmentId]['trackingNumber'] = $shipment->getTrackingNumber();
                 } elseif ($order_detail['is_virtual']) {
+                    if (!isset($productsByShipment['virtual_products'])) {
+                        $productsByShipment['virtual_products'] = ['products' => []];
+                    }
                     $productsByShipment['virtual_products']['products'][] = $order_detail;
                 }
             }
@@ -396,7 +399,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
             'addresses_tab' => $this->smarty->fetch($this->getTemplate('invoice.addresses-tab')),
             'summary_tab' => $this->smarty->fetch($this->getTemplate('invoice.summary-tab')),
             'product_tab' => $this->smarty->fetch($this->getTemplate('invoice.product-tab')),
-            'shipment_tab' => $this->smarty->fetch($this->getTemplate('invoice.shipment-tab')),
             'tax_tab' => $this->getTaxTabContent(),
             'discount_tab' => $this->smarty->fetch($this->getTemplate('invoice.discount-tab')),
             'payment_tab' => $this->smarty->fetch($this->getTemplate('invoice.payment-tab')),
