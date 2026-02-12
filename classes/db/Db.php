@@ -296,11 +296,18 @@ abstract class DbCore
     public static function getClass()
     {
         $class = '';
-        /* @phpstan-ignore-next-line */
-        if (extension_loaded('pdo_mysql')) {
-            $class = 'DbPDO';
-        } elseif (extension_loaded('mysqli')) {
-            $class = 'DbMySQLi';
+        if (_DB_TYPE_ == 'mysql') {
+            /* @phpstan-ignore-next-line */
+            if (extension_loaded('pdo_mysql')) {
+                $class = 'DbPDO';
+            } elseif (extension_loaded('mysqli')) {
+                $class = 'DbMySQLi';
+            }
+        }
+        if (_DB_TYPE_ == 'pgsql') {
+            if (extension_loaded('pdo_pgsql')) {
+                $class = 'DbPDO';
+            }
         }
 
         if (empty($class)) {
