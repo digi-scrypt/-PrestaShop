@@ -44,7 +44,7 @@ class ModulesDoctrineCompilerPass implements CompilerPassInterface
     /**
      * {@inheritdoc}
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $installedModules = $container->getParameter('prestashop.installed_modules');
         $compilerPassList = $this->getCompilerPassList($installedModules);
