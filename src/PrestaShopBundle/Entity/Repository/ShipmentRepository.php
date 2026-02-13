@@ -118,6 +118,28 @@ class ShipmentRepository extends EntityRepository
             ->executeStatement();
     }
 
+    /**
+     * Get shipment to order detail ID mapping for a given order.
+     *
+     * @param int $orderId
+     *
+     * @return array<int, array{id_shipment: int, id_order_detail: int}>
+     */
+    public function getShipmentProductMappingByOrderId(int $orderId): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $qb = $conn->createQueryBuilder();
+        $qb->select('sp.id_shipment', 'sp.id_order_detail')
+            ->from($this->tablePrefix . 'shipment_product', 'sp')
+            ->innerJoin('sp', $this->tablePrefix . 'shipment', 's', 's.id_shipment = sp.id_shipment')
+            ->where('s.id_order = :orderId')
+            ->setParameter('orderId', $orderId)
+            ->orderBy('sp.id_shipment');
+
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
+
     public function deleteEmptyShipmentByOrder(
         int $orderId,
     ): void {

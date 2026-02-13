@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -26,7 +27,6 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler;
 
-use Db;
 use PrestaShop\PrestaShop\Adapter\Carrier\Repository\CarrierRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
@@ -102,17 +102,9 @@ class GetOrderShipmentsWithProductsHandler implements GetOrderShipmentsWithProdu
      */
     private function getShipmentProductMapping(int $orderId): array
     {
-        $sql = '
-            SELECT sp.id_shipment, sp.id_order_detail
-            FROM `' . _DB_PREFIX_ . 'shipment_product` sp
-            INNER JOIN `' . _DB_PREFIX_ . 'shipment` s ON s.id_shipment = sp.id_shipment
-            WHERE s.id_order = ' . (int) $orderId . '
-            ORDER BY sp.id_shipment
-        ';
+        $results = $this->shipmentRepository->getShipmentProductMappingByOrderId($orderId);
 
-        $results = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-
-        if (!$results) {
+        if (empty($results)) {
             return [];
         }
 
