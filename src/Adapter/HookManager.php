@@ -27,6 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter;
 
 use Exception;
+use FrontKernel;
 use Hook;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -67,7 +68,7 @@ class HookManager
             $request = $sfContainer->get('request_stack')->getCurrentRequest();
         }
 
-        if (null !== $request) {
+        if (null !== $request && !in_array($sfContainer->getParameter('kernel.app_id'), [FrontKernel::APP_ID, 'webservice'])) {
             $hook_args = array_merge(['request' => $request], $hook_args);
 
             // If Symfony application is booted, we use it to dispatch Hooks
