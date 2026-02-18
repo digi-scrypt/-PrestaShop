@@ -17,6 +17,7 @@ use PrestaShop\PrestaShop\Core\Domain\Employee\ValueObject\EmployeeId;
 use PrestaShop\PrestaShop\Core\Employee\Access\EmployeeFormAccessCheckerInterface;
 use PrestaShop\PrestaShop\Core\Employee\EmployeeDataProviderInterface;
 use PrestaShop\PrestaShop\Core\Image\Uploader\ImageUploaderInterface;
+use PrestaShop\PrestaShop\Core\Security\PasswordPolicyConfiguration;
 use PrestaShopBundle\Entity\Repository\EmployeeRepository;
 use PrestaShopBundle\Security\Admin\UserTokenManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -140,7 +141,7 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
             $data['has_enabled_gravatar'] ?? false,
             $this->minLength,
             $this->maxLength,
-            $this->minScore
+            max(PasswordPolicyConfiguration::PASSWORD_SAFELY_UNGUESSABLE, $this->minScore)
         ));
 
         /** @var UploadedFile|null $uploadedAvatar */
@@ -175,10 +176,20 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
                     $id
                 );
 
-                $command->setPlainPassword($data['change_password']['new_password'], $this->minLength, $this->maxLength, $this->minScore);
+                $command->setPlainPassword(
+                    $data['change_password']['new_password'],
+                    $this->minLength,
+                    $this->maxLength,
+                    max(PasswordPolicyConfiguration::PASSWORD_SAFELY_UNGUESSABLE, $this->minScore)
+                );
             }
         } elseif (isset($data['password'])) {
-            $command->setPlainPassword($data['password'], $this->minLength, $this->maxLength, $this->minScore);
+            $command->setPlainPassword(
+                $data['password'],
+                $this->minLength,
+                $this->maxLength,
+                max(PasswordPolicyConfiguration::PASSWORD_SAFELY_UNGUESSABLE, $this->minScore)
+            );
         }
 
         if (isset($data['shop_association'])) {

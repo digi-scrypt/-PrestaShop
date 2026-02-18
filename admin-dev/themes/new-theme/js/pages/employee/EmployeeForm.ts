@@ -21,6 +21,8 @@ export default class EmployeeForm {
 
   tabsDropdownSelector: string;
 
+  passwordHandler: ChangePasswordHandler;
+
   constructor() {
     this.shopChoiceTreeSelector = employeeFormMap.shopChoiceTree;
     this.shopChoiceTree = new window.prestashop.component.ChoiceTree(this.shopChoiceTreeSelector);
@@ -49,6 +51,7 @@ export default class EmployeeForm {
     const passwordHandler = new ChangePasswordHandler(
       employeeFormMap.passwordStrengthFeedbackContainer,
     );
+    this.passwordHandler = passwordHandler;
     passwordHandler.watchPasswordStrength($(employeeFormMap.passwordInput));
 
     this.initEvents();
@@ -63,6 +66,23 @@ export default class EmployeeForm {
   private initEvents(): void {
     const $employeeProfilesDropdown = $(this.employeeProfileSelector);
     const getTabsUrl = $employeeProfilesDropdown.data('get-tabs-url');
+
+    const $passwordInput = $(employeeFormMap.passwordInput);
+    const $form = $passwordInput.closest('form');
+
+    if ($form.length) {
+      $form.on('submit', (e) => {
+        const passwordValue = $passwordInput.val() as string;
+
+        if (passwordValue && passwordValue.length > 0) {
+          $passwordInput.trigger('keyup');
+          if (!this.passwordHandler.isPasswordValid()) {
+            e.preventDefault();
+            this.showWeakPasswordMessage($form);
+          }
+        }
+      });
+    }
 
     $(document).on('change', this.employeeProfileSelector, () => this.toggleShopTree(),
     );
@@ -165,5 +185,16 @@ export default class EmployeeForm {
    */
   private createOption(name: string, value: string): JQuery {
     return $(`<option value="${value}">${name}</option>`);
+  }
+
+  /**
+   * Show flash message when submit is blocked due to weak password.
+   */
+  private showWeakPasswordMessage($form: JQuery): void {
+    const message = $form.data('weak-password-message') || $form.attr('data-weak-password-message');
+
+    if (typeof message === 'string' && message.length > 0 && typeof window.showErrorMessage === 'function') {
+      window.showErrorMessage(message);
+    }
   }
 }

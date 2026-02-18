@@ -105,6 +105,9 @@ final class EmployeeType extends AbstractType
         $maxLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MAXIMUM_LENGTH);
         $minLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_LENGTH);
 
+        // Employee passwords must be at least "strong" (score 3)
+        $employeeMinScore = max(PasswordPolicyConfiguration::PASSWORD_SAFELY_UNGUESSABLE, $minScore);
+
         $profileId = $builder->getData()['profile'] ?? reset($this->profilesChoices);
         $viewableTabs = $this->tabDataProvider->getViewableTabs($profileId, $this->languageContext->getId());
 
@@ -161,7 +164,7 @@ final class EmployeeType extends AbstractType
                 ),
                 'required' => !$options['is_for_editing'],
                 'attr' => [
-                    'data-minscore' => $minScore,
+                    'data-minscore' => $employeeMinScore,
                     'data-minlength' => $minLength,
                     'data-maxlength' => $maxLength,
                 ],

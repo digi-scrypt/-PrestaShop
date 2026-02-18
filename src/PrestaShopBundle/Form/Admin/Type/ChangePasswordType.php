@@ -49,6 +49,9 @@ class ChangePasswordType extends AbstractType
         $minLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_LENGTH);
         $minScore = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_SCORE);
 
+        // Employee passwords must be at least "strong" (score 3)
+        $employeeMinScore = max(PasswordPolicyConfiguration::PASSWORD_SAFELY_UNGUESSABLE, $minScore);
+
         $builder
             ->add('change_password_button', ButtonType::class, [
                 'label' => $this->trans('Change password...', [], 'Admin.Actions'),
@@ -76,7 +79,7 @@ class ChangePasswordType extends AbstractType
                         'Admin.Advparameters.Help'
                     ),
                     'attr' => [
-                        'data-minscore' => $minScore,
+                        'data-minscore' => $employeeMinScore,
                         'data-minlength' => $minLength,
                         'data-maxlength' => $maxLength,
                     ],
@@ -90,7 +93,7 @@ class ChangePasswordType extends AbstractType
                             [],
                             'Admin.Notifications.Error'
                         ),
-                        'data-minscore' => $minScore,
+                        'data-minscore' => $employeeMinScore,
                         'data-minlength' => $minLength,
                         'data-maxlength' => $maxLength,
                     ],
