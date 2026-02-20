@@ -19,11 +19,9 @@ use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SwitchShipmentCarrierCommand;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipmentsWithProducts;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentForViewing;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentProducts;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\ListAvailableShipments;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentWithProducts;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\ShipmentForViewing;
 use RuntimeException;
 use Tests\Integration\Behaviour\Features\Context\SharedStorage;
@@ -288,70 +286,5 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
         $this->getCommandBus()->handle(
             new DeleteProductFromShipment($shipmentId, $orderReferenceIds)
         );
-    }
-
-    /**
-     * @Then the order :orderReference shipments with products should contain:
-     *
-     * @param string $orderReference
-     * @param TableNode $table
-     */
-    public function verifyOrderShipmentsWithProducts(string $orderReference, TableNode $table): void
-    {
-        $orderId = $this->referenceToId($orderReference);
-        $data = $table->getColumnsHash();
-
-        /** @var array<OrderShipmentWithProducts> $shipmentsWithProducts */
-        $shipmentsWithProducts = $this->getQueryBus()->handle(
-            new GetOrderShipmentsWithProducts($orderId)
-        );
-
-        if (count($shipmentsWithProducts) === 0) {
-            throw new RuntimeException('Order [' . $orderId . '] has no shipments');
-        }
-
-        // Verify the number of shipments returned
-        Assert::assertEquals(
-            count($data),
-            count($shipmentsWithProducts),
-            sprintf('Expected %d shipments but got %d', count($data), count($shipmentsWithProducts))
-        );
-
-        // Verify each shipment's data
-        foreach ($data as $index => $expectedShipment) {
-            $actualShipment = $shipmentsWithProducts[$index];
-
-            // Verify carrier name
-            Assert::assertEquals(
-                $expectedShipment['carrier_name'],
-                $actualShipment->getCarrierName(),
-                sprintf('Carrier name mismatch for shipment at index %d', $index)
-            );
-
-            // Verify tracking number
-            Assert::assertEquals(
-                $expectedShipment['tracking_number'],
-                $actualShipment->getTrackingNumber() ?? '',
-                sprintf('Tracking number mismatch for shipment at index %d', $index)
-            );
-
-            // Verify order detail IDs count
-            $expectedOrderDetailCount = (int) $expectedShipment['order_detail_count'];
-            Assert::assertEquals(
-                $expectedOrderDetailCount,
-                count($actualShipment->getOrderDetailIds()),
-                sprintf(
-                    'Expected %d order details but got %d for shipment at index %d',
-                    $expectedOrderDetailCount,
-                    count($actualShipment->getOrderDetailIds()),
-                    $index
-                )
-            );
-
-            foreach ($actualShipment->getOrderDetailIds() as $orderDetailId) {
-                Assert::assertIsInt($orderDetailId, 'Order detail ID should be an integer');
-                Assert::assertGreaterThan(0, $orderDetailId, 'Order detail ID should be positive');
-            }
-        }
     }
 }
