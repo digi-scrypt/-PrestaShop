@@ -1,5 +1,4 @@
 <?php
-
 /**
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
@@ -120,8 +119,6 @@ class ShipmentRepository extends EntityRepository
 
     /**
      * Get shipment to order detail ID mapping for a given order.
-     *
-     * @param int $orderId
      *
      * @return array<int, array{id_shipment: int, id_order_detail: int}>
      */
