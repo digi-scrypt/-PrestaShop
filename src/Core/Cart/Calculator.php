@@ -405,9 +405,12 @@ class Calculator
      */
     private function roundedTaxIncluded(AmountImmutable $amount, int $computePrecision)
     {
+        $roundedTaxIncluded = Tools::ps_round($amount->getTaxIncluded(), $computePrecision);
+        $taxAmount = $amount->getTaxIncluded() - $amount->getTaxExcluded();
+
         return new AmountImmutable(
-            Tools::ps_round($amount->getTaxIncluded(), $computePrecision),
-            $amount->getTaxExcluded()
+            $roundedTaxIncluded,
+            $roundedTaxIncluded - $taxAmount
         );
     }
 }
