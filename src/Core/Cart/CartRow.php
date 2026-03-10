@@ -380,20 +380,26 @@ class CartRow
 
                 break;
             case self::ROUND_MODE_LINE:
-                // round line result
+                // round line result on taxIncluded, derive taxExcluded by preserving
+                // the original tax amount to avoid inflation of taxExcluded via independent rounding
+                $roundedTaxIncluded = $tools->round($this->initialUnitPrice->getTaxIncluded() * $quantity, $this->precision);
+                $taxAmount = ($this->initialUnitPrice->getTaxIncluded() - $this->initialUnitPrice->getTaxExcluded()) * $quantity;
                 $this->finalTotalPrice = new AmountImmutable(
-                    $tools->round($this->initialUnitPrice->getTaxIncluded() * $quantity, $this->precision),
-                    $tools->round($this->initialUnitPrice->getTaxExcluded() * $quantity, $this->precision)
+                    $roundedTaxIncluded,
+                    $roundedTaxIncluded - $taxAmount
                 );
 
                 break;
 
             case self::ROUND_MODE_ITEM:
             default:
-                // round each item
+                // round each item on taxIncluded, derive taxExcluded by preserving
+                // the original tax amount to avoid inflation of taxExcluded via independent rounding
+                $roundedTaxIncluded = $tools->round($this->initialUnitPrice->getTaxIncluded(), $this->precision);
+                $taxAmount = $this->initialUnitPrice->getTaxIncluded() - $this->initialUnitPrice->getTaxExcluded();
                 $this->initialUnitPrice = new AmountImmutable(
-                    $tools->round($this->initialUnitPrice->getTaxIncluded(), $this->precision),
-                    $tools->round($this->initialUnitPrice->getTaxExcluded(), $this->precision)
+                    $roundedTaxIncluded,
+                    $roundedTaxIncluded - $taxAmount
                 );
                 $this->finalTotalPrice = new AmountImmutable(
                     $this->initialUnitPrice->getTaxIncluded() * $quantity,
