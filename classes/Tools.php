@@ -2231,6 +2231,7 @@ class ToolsCore
 
         $media_domains = '';
         foreach ($medias as $media) {
+            $media = array_unique($media);
             foreach ($media as $media_url) {
                 if ($media_url) {
                     $media_domains .= 'RewriteCond %{HTTP_HOST} ^' . $media_url . '$ [OR]' . PHP_EOL;
