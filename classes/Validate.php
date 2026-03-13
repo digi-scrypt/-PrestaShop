@@ -30,6 +30,7 @@ use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CustomerName;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Factory\CustomerNameValidatorFactory;
 use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\NumericIsoCode;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\ApeCode;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\Ean13;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\Gtin;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\Isbn;
 use PrestaShop\PrestaShop\Core\Email\CyrillicCharactersInEmailValidation;
@@ -714,7 +715,7 @@ class ValidateCore
      */
     public static function isEan13($ean13)
     {
-        return !$ean13 || preg_match('/^[0-9]{0,13}$/', $ean13);
+        return !$ean13 || preg_match(Ean13::VALID_PATTERN, $ean13);
     }
 
     /**
