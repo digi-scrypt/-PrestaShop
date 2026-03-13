@@ -233,3 +233,5 @@ docker-compose.override.yml
 
 # config vscode
 .hintrc
+
+.idea/*
