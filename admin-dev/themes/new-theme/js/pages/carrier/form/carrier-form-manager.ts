@@ -49,6 +49,10 @@ export default class CarrierFormManager {
 
   $freeShippingInput: JQuery;
 
+  $needRangeInput: JQuery;
+
+  $form: JQuery;
+
   /**
    * @param {EventEmitter} eventEmitter
    */
@@ -61,6 +65,8 @@ export default class CarrierFormManager {
     this.$rangesInput = $(CarrierFormMap.rangesInput);
     this.$shippingMethodInput = $(CarrierFormMap.shippingMethodInput);
     this.$freeShippingInput = $(CarrierFormMap.freeShippingInput);
+    this.$form = $(CarrierFormMap.form);
+    this.$needRangeInput = $(CarrierFormMap.needRangeInput);
 
     // Initialize form
     this.initForm();
@@ -87,6 +93,40 @@ export default class CarrierFormManager {
     this.$shippingMethodInput.on('change', () => this.refreshCurrentShippingSymbol());
     $(CarrierFormMap.zonesContainer).on('click', CarrierFormMap.deleteZoneButton, (e:Event) => this.onDeleteZone(e));
     this.eventEmitter.on(CarrierFormEventMap.rangesUpdated, (ranges: Range[]) => this.onChangeRanges(ranges));
+    if (this.$needRangeInput.val() === '') {
+      this.$form.on('submit', (event: JQuery.Event) => this.onSubmitForm(event));
+    }
+  }
+
+  private onSubmitForm(event: JQuery.Event) {
+    event.preventDefault();
+    if (!this.hasValidRanges()) {
+      const modal = new ConfirmModal(
+        {
+          id: 'modal-error',
+          confirmButtonClass: 'btn-danger',
+          confirmTitle: 'Error', // @todo Here you need to pass the translated message.
+          confirmMessage: 'You need to enter the ranges and prices.', // @todo Here you need to pass the translated message.
+          confirmButtonLabel: 'Ok',
+          closeButtonLabel: 'Close',
+        },
+      );
+      modal.show();
+    }
+  }
+
+  private hasValidRanges(): boolean {
+    const rangesInputValue : string = String($(CarrierFormMap.rangesInput).val());
+    let length = 0;
+
+    if (rangesInputValue !== '') {
+      const parsed = JSON.parse(rangesInputValue);
+
+      if (Array.isArray(parsed)) {
+        length = parsed.length;
+      }
+    }
+    return length > 0;
   }
 
   private refreshFreeShipping(): void {
