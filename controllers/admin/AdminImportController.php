@@ -225,8 +225,8 @@ class AdminImportControllerCore extends AdminController
                     'id_tax_rules_group' => ['label' => $this->trans('Tax rule ID', [], 'Admin.Advparameters.Feature')],
                     'wholesale_price' => ['label' => $this->trans('Cost price', [], 'Admin.Catalog.Feature')],
                     'on_sale' => ['label' => $this->trans('On sale (0/1)', [], 'Admin.Advparameters.Feature')],
-                    'reduction_price' => ['label' => $this->trans('Discount amount', [], 'Admin.Advparameters.Feature')],
-                    'reduction_percent' => ['label' => $this->trans('Discount percent', [], 'Admin.Advparameters.Feature')],
+                    'reduction_price' => ['label' => $this->trans('Discount amount (use 0 to delete existing specific prices)', [], 'Admin.Advparameters.Feature')],
+                    'reduction_percent' => ['label' => $this->trans('Discount percent (use 0 to delete existing specific prices)', [], 'Admin.Advparameters.Feature')],
                     'reduction_from' => ['label' => $this->trans('Discount from (yyyy-mm-dd)', [], 'Admin.Advparameters.Feature')],
                     'reduction_to' => ['label' => $this->trans('Discount to (yyyy-mm-dd)', [], 'Admin.Advparameters.Feature')],
                     'reference' => ['label' => $this->trans('Reference #', [], 'Admin.Advparameters.Feature')],
@@ -1929,7 +1929,22 @@ class AdminImportControllerCore extends AdminController
                 }
             }
 
-            if ((isset($info['reduction_price']) && $info['reduction_price'] > 0) || (isset($info['reduction_percent']) && $info['reduction_percent'] > 0)) {
+            if ((isset($info['reduction_price']) && $info['reduction_price'] == 0)
+                || (isset($info['reduction_percent']) && $info['reduction_percent'] == 0)) {
+                $query = new DbQuery();
+                $query->select('*')
+                    ->from(SpecificPrice::$definition['table'], 'sp')
+                    ->where('sp.`from` <= now()')
+                    ->where('sp.`to` >= now()')
+                    ->where('sp.`id_product` = ' . (int) $product->id);
+
+                $specificPrices = Db::getInstance()->executeS($query);
+
+                foreach ($specificPrices as $specificPrice) {
+                    $specificPrice = new SpecificPrice($specificPrice['id_specific_price']);
+                    $specificPrice->delete();
+                }
+            } elseif ((isset($info['reduction_price']) && $info['reduction_price'] > 0) || (isset($info['reduction_percent']) && $info['reduction_percent'] > 0)) {
                 foreach ($id_shop_list as $id_shop) {
                     $specific_price = SpecificPrice::getSpecificPrice($product->id, $id_shop, 0, 0, 0, 1, 0, 0, 0, 0);
 
