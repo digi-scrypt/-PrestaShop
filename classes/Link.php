@@ -1020,6 +1020,21 @@ class LinkCore
     {
         $idSupplier = (int) $idSupplier;
 
+        $overrideUrl = Hook::exec(
+            'overrideSupplierImageLink',
+            [
+                'ids' => $idSupplier,
+                'type' => $type,
+                'extension' => $extension,
+            ],
+            null,
+            true
+        );
+
+        if (!empty($overrideUrl)) {
+            return $overrideUrl;
+        }
+
         if (file_exists(_PS_SUPP_IMG_DIR_ . $idSupplier . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension))) {
             $uriPath = _THEME_SUP_DIR_ . $idSupplier . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension);
         } elseif (!empty($type) && file_exists(_PS_SUPP_IMG_DIR_ . $idSupplier . '.' . $extension)) { // !empty($type) because if is empty, is already tested
@@ -1030,7 +1045,21 @@ class LinkCore
             $uriPath = _THEME_SUP_DIR_ . Context::getContext()->language->iso_code . '.' . $extension;
         }
 
-        return $this->getMediaLink($uriPath);
+        $url = $this->getMediaLink($uriPath);
+
+        Hook::exec(
+            'adaptSupplierImageLink',
+            [
+                'protocol_content' => $this->protocol_content,
+                'uri_path' => $uriPath,
+                'url' => &$url,
+                'ids' => $idSupplier,
+                'type' => $type,
+                'extension' => $extension,
+            ]
+        );
+
+        return $url;
     }
 
     /**
@@ -1046,6 +1075,21 @@ class LinkCore
     {
         $idManufacturer = (int) $idManufacturer;
 
+        $overrideUrl = Hook::exec(
+            'overrideManufacturerImageLink',
+            [
+                'ids' => $idManufacturer,
+                'type' => $type,
+                'extension' => $extension,
+            ],
+            null,
+            true
+        );
+
+        if (!empty($overrideUrl)) {
+            return $overrideUrl;
+        }
+
         if (file_exists(_PS_MANU_IMG_DIR_ . $idManufacturer . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension))) {
             $uriPath = _THEME_MANU_DIR_ . $idManufacturer . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension);
         } elseif (!empty($type) && file_exists(_PS_MANU_IMG_DIR_ . $idManufacturer . '.' . $extension)) { // !empty($type) because if is empty, is already tested
@@ -1056,7 +1100,21 @@ class LinkCore
             $uriPath = _THEME_MANU_DIR_ . Context::getContext()->language->iso_code . '.' . $extension;
         }
 
-        return $this->getMediaLink($uriPath);
+        $url = $this->getMediaLink($uriPath);
+
+        Hook::exec(
+            'adaptManufacturerImageLink',
+            [
+                'protocol_content' => $this->protocol_content,
+                'uri_path' => $uriPath,
+                'url' => &$url,
+                'ids' => $idManufacturer,
+                'type' => $type,
+                'extension' => $extension,
+            ]
+        );
+
+        return $url;
     }
 
     /**
@@ -1073,6 +1131,22 @@ class LinkCore
     {
         $idStore = (int) $idStore;
 
+        $overrideUrl = Hook::exec(
+            'overrideStoreImageLink',
+            [
+                'ids' => $idStore,
+                'name' => $name,
+                'type' => $type,
+                'extension' => $extension,
+            ],
+            null,
+            true
+        );
+
+        if (!empty($overrideUrl)) {
+            return $overrideUrl;
+        }
+
         if (file_exists(_PS_STORE_IMG_DIR_ . $idStore . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension))) {
             $uriPath = _THEME_STORE_DIR_ . $idStore . (empty($type) ? '.' . $extension : '-' . $type . '.' . $extension);
         } elseif (!empty($type) && file_exists(_PS_STORE_IMG_DIR_ . $idStore . '.' . $extension)) { // !empty($type) because if is empty, is already tested
@@ -1083,7 +1157,22 @@ class LinkCore
             $uriPath = _THEME_STORE_DIR_ . Context::getContext()->language->iso_code . '.' . $extension;
         }
 
-        return $this->getMediaLink($uriPath);
+        $url = $this->getMediaLink($uriPath);
+
+        Hook::exec(
+            'adaptStoreImageLink',
+            [
+                'protocol_content' => $this->protocol_content,
+                'uri_path' => $uriPath,
+                'url' => &$url,
+                'ids' => $idStore,
+                'type' => $type,
+                'name' => $name,
+                'extension' => $extension,
+            ]
+        );
+
+        return $url;
     }
 
     /**
@@ -1163,13 +1252,46 @@ class LinkCore
      */
     public function getCatImageLink($name, $idCategory, $type = null, string $extension = 'jpg')
     {
+        $idCategory = (int) $idCategory;
+
+        $overrideUrl = Hook::exec(
+            'overrideCategoryImageLink',
+            [
+                'ids' => $idCategory,
+                'name' => $name,
+                'type' => $type,
+                'extension' => $extension,
+            ],
+            null,
+            true
+        );
+
+        if (!empty($overrideUrl)) {
+            return $overrideUrl;
+        }
+
         if ($this->allow && $type) {
             $uriPath = __PS_BASE_URI__ . 'c/' . $idCategory . '-' . $type . '/' . $name . '.' . $extension;
         } else {
             $uriPath = _THEME_CAT_DIR_ . $idCategory . ($type ? '-' . $type : '') . '.' . $extension;
         }
 
-        return $this->getMediaLink($uriPath);
+        $url = $this->getMediaLink($uriPath);
+
+        Hook::exec(
+            'adaptCategoryImageLink',
+            [
+                'protocol_content' => $this->protocol_content,
+                'uri_path' => $uriPath,
+                'url' => &$url,
+                'ids' => $idCategory,
+                'type' => $type,
+                'name' => $name,
+                'extension' => $extension,
+            ]
+        );
+
+        return $url;
     }
 
     /**
