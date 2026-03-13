@@ -1579,9 +1579,9 @@ class ToolsCore
         unset($row);
 
         if (Tools::strtolower($order_way) == 'desc') {
-            uasort($array, 'cmpPriceDesc');
+            uasort($array, fn ($a, $b) => $b['price_tmp'] <=> $a['price_tmp']);
         } else {
-            uasort($array, 'cmpPriceAsc');
+            uasort($array, fn ($a, $b) => $a['price_tmp'] <=> $b['price_tmp']);
         }
         foreach ($array as &$row) {
             unset($row['price_tmp']);
@@ -4056,9 +4056,16 @@ exit;
  * @param array{"price_tmp": float} $b
  *
  * @return int
+ *
+ * @deprecated Since 9.0 and will be removed in 10.0
  */
 function cmpPriceAsc($a, $b)
 {
+    @trigger_error(sprintf(
+        '%s is deprecated since 9.0 and will be removed in 10.0.',
+        __FUNCTION__
+    ), E_USER_DEPRECATED);
+
     return $a['price_tmp'] <=> $b['price_tmp'];
 }
 
@@ -4067,8 +4074,15 @@ function cmpPriceAsc($a, $b)
  * @param array{"price_tmp": float} $b
  *
  * @return int
+ *
+ * @deprecated Since 9.0 and will be removed in 10.0
  */
 function cmpPriceDesc($a, $b)
 {
+    @trigger_error(sprintf(
+        '%s is deprecated since 9.0 and will be removed in 10.0.',
+        __FUNCTION__
+    ), E_USER_DEPRECATED);
+
     return $b['price_tmp'] <=> $a['price_tmp'];
 }
