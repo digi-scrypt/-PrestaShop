@@ -1041,8 +1041,8 @@ class ProductLazyArray extends AbstractLazyArray
                 $this->product['discount_percentage'] = Context::getContext()->getCurrentLocale()->formatNumber($presNegativeReduction) . '%';
                 $this->product['discount_percentage_absolute'] = Context::getContext()->getCurrentLocale()->formatNumber($presAbsoluteReduction) . '%';
             }
-            
-            /* 
+
+            /*
              * Then, the amount reduction. Amount reduction is valid for both percentage and amount reduction types,
              * because in case of percentage, we also want to display the real amount of discount. Core provides us
              * with the calculated reduction.
