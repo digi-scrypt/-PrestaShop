@@ -50,11 +50,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
 {
     /**
-     * @var array
-     */
-    private $renderingContent = [];
-
-    /**
      * @var RequestStack
      */
     private $requestStack;
@@ -170,6 +165,8 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
      */
     protected function doDispatch($listeners, $eventName, Event $event)
     {
+        $hookContent = [];
+
         foreach ($listeners as $listener) {
             // removes $this to parameters. Hooks should not have access to dispatcher
             ob_start();
@@ -179,12 +176,11 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
             if ($event instanceof RenderingHookEvent) {
                 $listenerName = $event->popListener() ?: $listener[1];
 
-                $this->renderingContent[$listenerName] = $event->popContent();
+                $hookContent[$listenerName] = $event->popContent();
             }
         }
         if ($event instanceof RenderingHookEvent) {
-            $event->setContent($this->renderingContent);
-            $this->renderingContent = [];
+            $event->setContent($hookContent);
         }
     }
 
