@@ -5,6 +5,7 @@
  */
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 
 @ini_set('max_execution_time', '0');
 /* No max line limit since the lines can be more than 4096. Performance impact is not significant. */
@@ -693,7 +694,7 @@ class AdminImportControllerCore extends AdminController
             || !@move_uploaded_file($_FILES['file']['tmp_name'], AdminImportController::getPath() . $filename_prefix . str_replace("\0", '', $_FILES['file']['name']))) {
             $_FILES['file']['error'] = $this->trans('An error occurred while uploading / copying the file.', [], 'Admin.Advparameters.Notification');
         } else {
-            @chmod(AdminImportController::getPath() . $filename_prefix . $_FILES['file']['name'], 0664);
+            @chmod(AdminImportController::getPath() . $filename_prefix . $_FILES['file']['name'], FileSystem::PERM_FILE_GROUP_WRITABLE);
             $_FILES['file']['filename'] = $filename_prefix . str_replace('\0', '', $_FILES['file']['name']);
         }
 

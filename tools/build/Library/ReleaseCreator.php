@@ -8,6 +8,9 @@
  * This class is used to create a release of PrestaShop,
  * see ReleaseCreator::createRelease() function.
  */
+
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
+
 class ReleaseCreator
 {
     /**
@@ -264,7 +267,7 @@ class ReleaseCreator
      */
     public function createRelease()
     {
-        if (!file_exists($this->destinationDir) && !mkdir($this->destinationDir, 0777, true)) {
+        if (!file_exists($this->destinationDir) && !mkdir($this->destinationDir, FileSystem::PERM_DIR_WORLD_WRITABLE, true)) {
             throw new BuildException("ERROR: can not create directory '{$this->destinationDir}'");
         }
         $startTime = date('H:i:s');
@@ -617,11 +620,11 @@ class ReleaseCreator
     protected function createAndRenameFolders()
     {
         if (!file_exists($this->tempProjectPath . '/var/cache/')) {
-            mkdir($this->tempProjectPath . '/var/cache', 0777, true);
+            mkdir($this->tempProjectPath . '/var/cache', FileSystem::PERM_DIR_WORLD_WRITABLE, true);
         }
 
         if (!file_exists($this->tempProjectPath . '/var/logs/')) {
-            mkdir($this->tempProjectPath . '/var/logs', 0777, true);
+            mkdir($this->tempProjectPath . '/var/logs', FileSystem::PERM_DIR_WORLD_WRITABLE, true);
         }
         $itemsToRename = ['admin-dev' => 'admin', 'install-dev' => 'install'];
         $basePath = $this->tempProjectPath;

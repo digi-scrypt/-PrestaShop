@@ -9,6 +9,9 @@
  *
  * Most methods are copied from https://github.com/PrestaShop/autoupgrade/blob/master/classes/TaskRunner/Upgrade/Unzip.php
  */
+
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
+
 class Unzip
 {
     /**
@@ -51,7 +54,7 @@ class Unzip
             if (false === mkdir($toDir)) {
                 throw new PrestashopCouldNotUnzipLatestVersionException('Unzip destination folder cannot be used');
             }
-            chmod($toDir, 0775);
+            chmod($toDir, FileSystem::PERM_DIR_GROUP_WRITABLE);
         }
 
         $this->extractWithZipArchive($fromFile, $toDir);

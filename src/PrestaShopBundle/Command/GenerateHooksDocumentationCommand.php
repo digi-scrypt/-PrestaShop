@@ -8,6 +8,7 @@ namespace PrestaShopBundle\Command;
 
 use Exception;
 use InvalidArgumentException;
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Hook\Extractor\HookExtractor;
 use PrestaShop\PrestaShop\Core\Hook\Provider\GridDefinitionHookByServiceIdsProvider;
 use PrestaShop\PrestaShop\Core\Version;
@@ -144,7 +145,7 @@ final class GenerateHooksDocumentationCommand extends Command
     {
         $outputDir = $mdDir;
         if (!is_dir($outputDir)) {
-            mkdir($outputDir, 0777, true);
+            mkdir($outputDir, FileSystem::PERM_DIR_WORLD_WRITABLE, true);
         }
         $outputDir = rtrim($outputDir, '/') . '/';
 

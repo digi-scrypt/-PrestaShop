@@ -4,11 +4,14 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-/**
+/*
  * Class ImageManagerCore.
  *
  * This class includes functions for image manipulation
  */
+
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
+
 class ImageManagerCore
 {
     public const ERROR_FILE_NOT_EXIST = 1;
@@ -694,7 +697,7 @@ class ImageManagerCore
         }
         // @phpstan-ignore-next-line
         imagedestroy($resource);
-        @chmod($filename, 0664);
+        @chmod($filename, FileSystem::PERM_FILE_GROUP_WRITABLE);
 
         return $success;
     }

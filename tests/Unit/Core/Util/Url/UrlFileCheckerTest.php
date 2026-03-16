@@ -9,6 +9,7 @@ namespace Tests\Unit\Core\Util\Url;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
+use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Util\Url\UrlFileChecker;
 use PrestaShop\PrestaShop\Core\Util\Url\UrlFileCheckerInterface;
 
@@ -23,11 +24,11 @@ class UrlFileCheckerTest extends TestCase
     {
         $this->root = vfsStream::setup('foo');
 
-        vfsStream::newFile('not_writable_files/.htaccess', 0400)->at($this->root);
-        vfsStream::newFile('not_writable_files/robots.txt', 0400)->at($this->root);
+        vfsStream::newFile('not_writable_files/.htaccess', FileSystem::PERM_FILE_PRIVATE_READ)->at($this->root);
+        vfsStream::newFile('not_writable_files/robots.txt', FileSystem::PERM_FILE_PRIVATE_READ)->at($this->root);
 
-        vfsStream::newFile('writable_files/.htaccess', 0644)->at($this->root);
-        vfsStream::newFile('writable_files/robots.txt', 0644)->at($this->root);
+        vfsStream::newFile('writable_files/.htaccess', FileSystem::PERM_FILE_DEFAULT)->at($this->root);
+        vfsStream::newFile('writable_files/robots.txt', FileSystem::PERM_FILE_DEFAULT)->at($this->root);
     }
 
     public function testIsValidImplementation()
