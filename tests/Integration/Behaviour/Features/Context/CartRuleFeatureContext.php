@@ -160,6 +160,15 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
                 $countryIds = $this->referencesToIds($data['countries']);
                 $this->setCartRuleCountries($cartRule, $countryIds);
             }
+            if (isset($data['customer'])) {
+                $cartRule->id_customer = $this->referenceToId($data['customer']);
+                $cartRule->save();
+            }
+            if (isset($data['groups'])) {
+                $cartRule->group_restriction = true;
+                $cartRule->save();
+                $this->setCartRuleGroups($cartRule, $this->referencesToIds($data['groups']));
+            }
         } else {
             Assert::assertEquals($cartRule->name, $data['name'], 'Unexpected cart rule name');
             Assert::assertEquals($cartRule->description, $data['description'] ?? '', 'Unexpected cart rule description');
@@ -219,7 +228,7 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
         unset($data['priority'], $data['total_quantity'], $data['quantity_per_user'], $data['code'], $data['free_shipping'], $data['allow_partial_use'], $data['active']);
         unset($data['valid_from'], $data['valid_to'], $data['apply_to_discounted_products'], $data['gift_product']);
         unset($data['minimum_amount'], $data['minimum_amount_currency'], $data['minimum_amount_tax_included'], $data['minimum_amount_shipping_included'], $data['discount_product']);
-        unset($data['quantity'], $data['cheapest_product'], $data['carriers'], $data['countries']);
+        unset($data['quantity'], $data['cheapest_product'], $data['carriers'], $data['countries'], $data['customer'], $data['groups']);
         if (!empty($data)) {
             throw new RuntimeException(sprintf('There are fields that were not handled in cart rule creation: %s', implode(',', array_keys($data))));
         }
@@ -291,6 +300,22 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
             }
         }
         $cartRule->country_restriction = !empty($countryIds);
+        $cartRule->save();
+    }
+
+    protected function setCartRuleGroups(CartRule $cartRule, array $groupIds): void
+    {
+        Db::getInstance()->execute(
+            'DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_group` WHERE `id_cart_rule` = ' . (int) $cartRule->id
+        );
+        if (!empty($groupIds)) {
+            foreach ($groupIds as $groupId) {
+                Db::getInstance()->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'cart_rule_group` (`id_cart_rule`, `id_group`) VALUES (' . (int) $cartRule->id . ', ' . (int) $groupId . ')'
+                );
+            }
+        }
+        $cartRule->group_restriction = !empty($groupIds);
         $cartRule->save();
     }
 
@@ -533,6 +558,32 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
         if ($expectedValue != $cartRule->reduction_amount) {
             throw new RuntimeException(sprintf('Expects %s, got %s instead', $expectedValue, $cartRule->reduction_amount));
         }
+    }
+
+    /**
+     * @Then cart rule :cartRuleReference applies to all customers and is disabled
+     */
+    public function assertCartRuleAppliesToAllCustomersAndIsDisabled(string $cartRuleReference): void
+    {
+        $cartRule = new CartRule($this->referenceToId($cartRuleReference));
+        Assert::assertEquals(0, (int) $cartRule->id_customer, sprintf('Cart rule "%s" should apply to all customers (id_customer=0)', $cartRuleReference));
+        Assert::assertFalse((bool) $cartRule->active, sprintf('Cart rule "%s" should be disabled', $cartRuleReference));
+    }
+
+    /**
+     * @Then cart rule :cartRuleReference is enabled and applies only to group :groupReference
+     */
+    public function assertCartRuleIsEnabledAndAppliesOnlyToGroup(string $cartRuleReference, string $groupReference): void
+    {
+        $cartRule = new CartRule($this->referenceToId($cartRuleReference));
+        Assert::assertTrue((bool) $cartRule->active, sprintf('Cart rule "%s" should be enabled', $cartRuleReference));
+        Assert::assertTrue((bool) $cartRule->group_restriction, sprintf('Cart rule "%s" should have group restriction', $cartRuleReference));
+        $groupId = $this->referenceToId($groupReference);
+        $rows = Db::getInstance()->executeS(
+            'SELECT id_group FROM `' . _DB_PREFIX_ . 'cart_rule_group` WHERE `id_cart_rule` = ' . (int) $cartRule->id
+        );
+        $groupIds = $rows ? array_map('intval', array_column($rows, 'id_group')) : [];
+        Assert::assertEquals([$groupId], $groupIds, sprintf('Cart rule "%s" should apply only to group "%s"', $cartRuleReference, $groupReference));
     }
 
     /**

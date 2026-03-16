@@ -6,6 +6,7 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Feature;
 
+use CartRule;
 use Group;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
@@ -54,6 +55,7 @@ class GroupFeature implements FeatureInterface
      */
     public function disable()
     {
+        CartRule::disableGroupRestrictedCartRules();
         $this->configuration->set('PS_GROUP_FEATURE_ACTIVE', false);
     }
 

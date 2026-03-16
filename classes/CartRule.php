@@ -645,28 +645,107 @@ class CartRuleCore extends ObjectModel
     }
 
     /**
-     * Delete CartRules by Customer ID.
+     * On customer deletion: set their cart rules to apply to all customers and disable them.
      *
      * @param int $id_customer Customer ID
      *
-     * @return bool Indicates if the CartRules were successfully deleted
+     * @return bool
      */
     public static function deleteByIdCustomer($id_customer)
     {
-        // Remove cart rules only if we got some sensible ID of a customer.
-        // If we would pass zero further below, it would delete all non-customer-restricted cart rules.
         if (empty($id_customer)) {
             return false;
         }
 
-        $return = true;
-        $cart_rules = new PrestaShopCollection('CartRule');
-        $cart_rules->where('id_customer', '=', $id_customer);
-        foreach ($cart_rules as $cart_rule) {
-            $return &= $cart_rule->delete();
+        $db = Db::getInstance();
+        $result = $db->update(
+            'cart_rule',
+            [
+                'id_customer' => 0,
+                'active' => false,
+                'date_upd' => date('Y-m-d H:i:s'),
+            ],
+            '`id_customer` = ' . (int) $id_customer
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * On group deletion: disable cart rules that had only this group (call before deleting from cart_rule_group).
+     *
+     * @param int $id_group Group ID being deleted
+     *
+     * @return bool
+     */
+    public static function disableCartRulesThatHadOnlyGroup($id_group)
+    {
+        if (empty($id_group)) {
+            return false;
         }
 
-        return $return;
+        $prefix = _DB_PREFIX_;
+        $db = Db::getInstance();
+
+        $cartRuleIds = $db->executeS(
+            'SELECT crg.`id_cart_rule`
+            FROM `' . $prefix . 'cart_rule_group` crg
+            INNER JOIN `' . $prefix . 'cart_rule` cr ON cr.`id_cart_rule` = crg.`id_cart_rule` AND cr.`group_restriction` = 1
+            WHERE crg.`id_group` = ' . (int) $id_group . '
+            AND crg.`id_cart_rule` IN (
+                SELECT `id_cart_rule` FROM `' . $prefix . 'cart_rule_group` GROUP BY `id_cart_rule` HAVING COUNT(*) = 1
+            )'
+        );
+
+        if (empty($cartRuleIds)) {
+            return true;
+        }
+
+        $ids = array_map('intval', array_column($cartRuleIds, 'id_cart_rule'));
+        $idList = implode(',', $ids);
+
+        return $db->update(
+            'cart_rule',
+            [
+                'group_restriction' => 0,
+                'active' => false,
+                'date_upd' => date('Y-m-d H:i:s'),
+            ],
+            '`id_cart_rule` IN (' . $idList . ')'
+        ) !== false;
+    }
+
+    /**
+     * On Customer groups feature disable: clear group restriction and disable affected cart rules.
+     *
+     * @return bool
+     */
+    public static function disableGroupRestrictedCartRules()
+    {
+        $prefix = _DB_PREFIX_;
+        $db = Db::getInstance();
+
+        $cartRuleIds = $db->executeS(
+            'SELECT `id_cart_rule` FROM `' . $prefix . 'cart_rule` WHERE `group_restriction` = 1'
+        );
+        if (empty($cartRuleIds)) {
+            return true;
+        }
+
+        $ids = array_map('intval', array_column($cartRuleIds, 'id_cart_rule'));
+        $idList = implode(',', $ids);
+
+        $db->delete('cart_rule_group', '`id_cart_rule` IN (' . $idList . ')');
+
+        return $db->update(
+            'cart_rule',
+            [
+                'group_restriction' => 0,
+                'active' => false,
+                'date_upd' => date('Y-m-d H:i:s'),
+            ],
+            '`id_cart_rule` IN (' . $idList . ')'
+        ) !== false;
     }
 
     /**
