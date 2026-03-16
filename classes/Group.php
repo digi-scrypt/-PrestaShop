@@ -209,13 +209,19 @@ class GroupCore extends ObjectModel
         }
 
         if (parent::delete()) {
-            Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'customer_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'category_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'group_reduction` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'product_group_reduction_cache` WHERE `id_group` = ' . (int) $this->id);
 
             $this->truncateModulesRestrictions($this->id);
+
+            // Disable cart rules which are only associated to this group
+            if (!$this->disableAssociatedCartRules()) {
+                return false;
+            }
+
+            Db::getInstance()->delete('cart_rule_group', 'id_group = ' . (int) $this->id);
 
             // Add default group (id 3) to customers without groups
             Db::getInstance()->execute('INSERT INTO `' . _DB_PREFIX_ . 'customer_group` (
@@ -424,5 +430,31 @@ class GroupCore extends ObjectModel
 				ON (g.`id_group` = gl.`id_group`)
 			WHERE `name` = \'' . pSQL($query) . '\'
 		');
+    }
+
+    /**
+     * Disable cart rules which are associated to this group.
+     *
+     * @return bool
+     */
+    public function disableAssociatedCartRules(): bool
+    {
+        // Get all cart rules associated to this group
+        $cart_rule_ids = Db::getInstance()->executeS('SELECT cr.id_cart_rule
+            FROM ' . _DB_PREFIX_ . 'cart_rule cr
+            INNER JOIN ' . _DB_PREFIX_ . 'cart_rule_group crg ON crg.id_cart_rule = cr.id_cart_rule AND crg.id_group = ' . (int) $this->id . '
+            LEFT JOIN ' . _DB_PREFIX_ . 'cart_rule_group crg_other ON crg_other.id_cart_rule = cr.id_cart_rule AND crg_other.id_group != ' . (int) $this->id . '
+            WHERE crg_other.id_group IS NULL AND cr.group_restriction = 1
+        ');
+
+        foreach ($cart_rule_ids as $cart_rule_id) {
+            $cart_rule = new CartRule((int) $cart_rule_id['id_cart_rule']);
+
+            $cart_rule->active = false;
+
+            $cart_rule->update();
+        }
+
+        return true;
     }
 }
