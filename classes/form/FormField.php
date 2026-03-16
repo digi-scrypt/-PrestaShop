@@ -18,6 +18,12 @@ class FormFieldCore
     private $maxLength = null;
     private $errors = [];
     private $constraints = [];
+
+    /**
+     * @var bool
+     */
+    private $disabled = false;
+
     private $attr = [];
 
     /**
@@ -44,6 +50,7 @@ class FormFieldCore
             'errors' => $this->getErrors(),
             'autocomplete' => $this->getAutocompleteAttribute(),
             'attr' => $this->getAttr(),
+            'disabled' => $this->getDisabled(),
         ];
 
         Hook::exec('additionalHtmlAttributesFormFields', ['formFieldArray' => &$formField]);
@@ -214,6 +221,18 @@ class FormFieldCore
     public function getAutocompleteAttribute(): string
     {
         return $this->autocomplete;
+    }
+
+    public function getDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
+    public function setDisabled(bool $disabled): FormFieldCore
+    {
+        $this->disabled = $disabled;
+
+        return $this;
     }
 
     /**
