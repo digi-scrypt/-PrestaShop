@@ -150,18 +150,38 @@ export default class ChangePasswordControl {
     // Prevent submitting the form if new password is not valid
     $(document).on(
       'submit',
-      $(this.oldPasswordInputSelector).closest('form'),
+      'form',
       (event) => {
-        // If password input is disabled - we don't need to validate it.
+        const $form = $(event.currentTarget);
+
+        if ($form.find(this.oldPasswordInputSelector).length === 0) {
+          return;
+        }
         if ($(this.oldPasswordInputSelector).is(':disabled')) {
           return;
         }
 
+        $(this.newPasswordInputSelector).first().trigger('keyup');
         if (!this.passwordValidator.isPasswordValid()) {
           event.preventDefault();
+          this.showWeakPasswordMessage($form);
+        } else if (!this.passwordHandler.isPasswordValid()) {
+          event.preventDefault();
+          this.showWeakPasswordMessage($form);
         }
       },
     );
+  }
+
+  /**
+   * Show flash message when submit is blocked due to weak password.
+   */
+  private showWeakPasswordMessage($form: JQuery): void {
+    const message = $form.data('weak-password-message') || $form.attr('data-weak-password-message');
+
+    if (typeof message === 'string' && message.length > 0 && typeof window.showErrorMessage === 'function') {
+      window.showErrorMessage(message);
+    }
   }
 
   /**

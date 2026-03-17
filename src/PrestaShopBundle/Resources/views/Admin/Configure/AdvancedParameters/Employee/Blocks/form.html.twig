@@ -8,7 +8,11 @@
 {% trans_default_domain 'Admin.Advparameters.Feature' %}
 
 {% block employee_form %}
-  {{ form_start(employeeForm) }}
+  {{ form_start(employeeForm, {
+    attr: {
+      'data-weak-password-message': 'The password doesn\'t meet the password policy requirements.'|trans({}, 'Admin.Notifications.Error')
+    }
+  }) }}
   <div class="card">
     <h3 class="card-header">
       {{ 'Employee'|trans }}
