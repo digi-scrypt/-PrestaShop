@@ -33,11 +33,23 @@
 		<td colspan="12" height="20">&nbsp;</td>
 	</tr>
 
-	<!-- Product -->
+  <!-- Product -->
 	<tr>
 		<td colspan="12">
 
-			{$product_tab}
+			{if $has_shipment}
+				{foreach $products_by_shipment['physical_products'] item=$shipment name="shipments_loop"}
+					{include file="./invoice.shipment-tab.tpl" shipment=$shipment current=$smarty.foreach.shipments_loop.iteration totalShipment=$smarty.foreach.shipments_loop.total}
+				{/foreach}
+
+				{if isset($products_by_shipment['virtual_products'])}
+					{foreach $products_by_shipment['virtual_products'] item=$products}
+						{include file="./invoice.product-tab.tpl" order_details=$products}
+					{/foreach}
+				{/if}
+			{else}
+				{$product_tab}
+			{/if}
 
 		</td>
 	</tr>
@@ -69,6 +81,17 @@
 		<td colspan="12" height="10">&nbsp;</td>
 	</tr>
 
+	{if $cart_rules && $has_shipment}
+		<tr>
+			<td colspan="6" class="left">
+
+				{$discount_tab}
+
+			</td>
+			<td colspan="1">&nbsp;</td>
+		</tr>
+	{/if}
+
 	<tr>
 		<td colspan="6" class="left">
 
@@ -78,14 +101,16 @@
 		<td colspan="1">&nbsp;</td>
 	</tr>
 
-	<tr>
-		<td colspan="6" class="left">
+	{if !$has_shipment}
+		<tr>
+			<td colspan="6" class="left">
 
-			{$shipping_tab}
+				{$shipping_tab}
 
-		</td>
-		<td colspan="1">&nbsp;</td>
-	</tr>
+			</td>
+			<td colspan="1">&nbsp;</td>
+		</tr>
+	{/if}
 
 	<tr>
 		<td colspan="12" height="10">&nbsp;</td>

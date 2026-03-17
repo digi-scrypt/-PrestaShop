@@ -4,7 +4,9 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
+use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Core\Util\Sorter;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 
 class HTMLTemplateInvoiceCore extends HTMLTemplate
 {
@@ -24,6 +26,11 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
     public $available_in_your_account = false;
 
     /**
+     * @var ShipmentRepository
+     */
+    private $shipmentRepository;
+
+    /**
      * @param OrderInvoice $order_invoice
      * @param Smarty $smarty
      * @param bool $bulk_mode
@@ -36,6 +43,9 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $this->order = new Order((int) $this->order_invoice->id_order);
         $this->smarty = $smarty;
         $this->smarty->assign('isTaxEnabled', (bool) Configuration::get('PS_TAX'));
+
+        $containerFinder = new ContainerFinder(Context::getContext());
+        $this->shipmentRepository = $containerFinder->getContainer()->get(ShipmentRepository::class);
 
         // If shop_address is null, then update it with current one.
         // But no DB save required here to avoid massive updates for bulk PDF generation case.
@@ -217,9 +227,45 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
             unset($order_detail); // don't overwrite the last order_detail later
         }
 
+        $shipmentsWithProducts = $this->getOrderShipmentsWithProducts($this->order->id);
+        $orderHasShipment = !empty($shipmentsWithProducts);
+
+        $productsByShipment = [];
+
         // Sort products by Reference ID (and if equals (like combination) by Supplier Reference)
         $sorter = new Sorter();
         $order_details = $sorter->natural($order_details, Sorter::ORDER_DESC, 'product_reference', 'product_supplier_reference');
+
+        if ($orderHasShipment) {
+            $orderDetailToShipmentId = [];
+            foreach ($shipmentsWithProducts as $shipmentWithProducts) {
+                $shipmentId = $shipmentWithProducts['shipmentId'];
+
+                $productsByShipment['physical_products'][$shipmentId] = [
+                    'products' => [],
+                    'carrierName' => $shipmentWithProducts['carrierName'],
+                    'trackingNumber' => $shipmentWithProducts['trackingNumber'],
+                ];
+
+                foreach ($shipmentWithProducts['orderDetailIds'] as $orderDetailId) {
+                    $orderDetailToShipmentId[$orderDetailId] = $shipmentId;
+                }
+            }
+
+            foreach ($order_details as $order_detail) {
+                $orderDetailId = $order_detail['id_order_detail'];
+
+                if (isset($orderDetailToShipmentId[$orderDetailId])) {
+                    $shipmentId = $orderDetailToShipmentId[$orderDetailId];
+                    $productsByShipment['physical_products'][$shipmentId]['products'][] = $order_detail;
+                } elseif ($order_detail['is_virtual']) {
+                    if (!isset($productsByShipment['virtual_products'])) {
+                        $productsByShipment['virtual_products'] = ['products' => []];
+                    }
+                    $productsByShipment['virtual_products']['products'][] = $order_detail;
+                }
+            }
+        }
 
         $cart_rules = $this->order->getCartRules();
         $free_shipping = false;
@@ -323,6 +369,8 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         }
 
         $data = [
+            'has_shipment' => $orderHasShipment,
+            'products_by_shipment' => $productsByShipment,
             'order' => $this->order,
             'order_invoice' => $this->order_invoice,
             'order_details' => $order_details,
@@ -350,6 +398,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
             'summary_tab' => $this->smarty->fetch($this->getTemplate('invoice.summary-tab')),
             'product_tab' => $this->smarty->fetch($this->getTemplate('invoice.product-tab')),
             'tax_tab' => $this->getTaxTabContent(),
+            'discount_tab' => $this->smarty->fetch($this->getTemplate('invoice.discount-tab')),
             'payment_tab' => $this->smarty->fetch($this->getTemplate('invoice.payment-tab')),
             'note_tab' => $this->smarty->fetch($this->getTemplate('invoice.note-tab')),
             'total_tab' => $this->smarty->fetch($this->getTemplate('invoice.total-tab')),
@@ -369,8 +418,8 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
     {
         $address = new Address((int) $this->order->{Configuration::get('PS_TAX_ADDRESS_TYPE')});
         $tax_exempt = Configuration::get('VATNUMBER_MANAGEMENT')
-                            && !empty($address->vat_number)
-                            && $address->id_country != Configuration::get('VATNUMBER_COUNTRY');
+            && !empty($address->vat_number)
+            && $address->id_country != Configuration::get('VATNUMBER_COUNTRY');
         $carrier = new Carrier($this->order->id_carrier);
 
         $data = [
@@ -478,5 +527,71 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
             '%s.pdf',
             $this->order_invoice->getInvoiceNumberFormatted($id_lang, $id_shop)
         );
+    }
+
+    /**
+     * Get shipments with products (array of order details IDs) for an order.
+     *
+     * @return array Array of shipment data with products
+     */
+    private function getOrderShipmentsWithProducts(int $orderId): array
+    {
+        try {
+            $shipments = $this->shipmentRepository->findByOrderId($orderId);
+        } catch (Throwable $e) {
+            return [];
+        }
+
+        if (empty($shipments)) {
+            return [];
+        }
+
+        $shipmentProductMapping = $this->getShipmentProductMapping($orderId);
+
+        $result = [];
+        foreach ($shipments as $shipment) {
+            $shipmentId = $shipment->getId();
+            $carrier = new Carrier($shipment->getCarrierId());
+
+            $orderDetailIds = $shipmentProductMapping[$shipmentId] ?? [];
+
+            $result[] = [
+                'shipmentId' => $shipmentId,
+                'orderDetailIds' => $orderDetailIds,
+                'carrierName' => $carrier->name,
+                'trackingNumber' => $shipment->getTrackingNumber(),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get shipment to order detail ID mapping.
+     * Returns an array where keys are shipment IDs and values are arrays of order detail IDs.
+     *
+     * @return array<int, int[]>
+     */
+    private function getShipmentProductMapping(int $orderId): array
+    {
+        $results = $this->shipmentRepository->getShipmentProductMappingByOrderId($orderId);
+
+        if (empty($results)) {
+            return [];
+        }
+
+        $mapping = [];
+        foreach ($results as $row) {
+            $shipmentId = (int) $row['id_shipment'];
+            $orderDetailId = (int) $row['id_order_detail'];
+
+            if (!isset($mapping[$shipmentId])) {
+                $mapping[$shipmentId] = [];
+            }
+
+            $mapping[$shipmentId][] = $orderDetailId;
+        }
+
+        return $mapping;
     }
 }
