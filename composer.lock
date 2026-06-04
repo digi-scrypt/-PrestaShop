@@ -4798,16 +4798,16 @@
         },
         {
             "name": "prestashop/dashactivity",
-            "version": "v2.1.1",
+            "version": "v2.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/dashactivity.git",
-                "reference": "e604732a897a26d751afac09936bdcb7eb7b9044"
+                "reference": "c428ae5b4030dd3b551919cb328111ded80c3ef8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/dashactivity/zipball/e604732a897a26d751afac09936bdcb7eb7b9044",
-                "reference": "e604732a897a26d751afac09936bdcb7eb7b9044",
+                "url": "https://api.github.com/repos/PrestaShop/dashactivity/zipball/c428ae5b4030dd3b551919cb328111ded80c3ef8",
+                "reference": "c428ae5b4030dd3b551919cb328111ded80c3ef8",
                 "shasum": ""
             },
             "require": {
@@ -4830,22 +4830,23 @@
             "description": "PrestaShop module dashactivity",
             "homepage": "https://github.com/PrestaShop/dashactivity",
             "support": {
-                "source": "https://github.com/PrestaShop/dashactivity/tree/v2.1.1"
+                "issues": "https://github.com/PrestaShop/dashactivity/issues",
+                "source": "https://github.com/PrestaShop/dashactivity/tree/v2.1.2"
             },
-            "time": "2024-04-08T11:12:02+00:00"
+            "time": "2026-05-25T13:31:15+00:00"
         },
         {
             "name": "prestashop/dashgoals",
-            "version": "v2.0.4",
+            "version": "v2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/dashgoals.git",
-                "reference": "13667ef6458cdbc55b760a1d9ae75ac76bb13932"
+                "reference": "24d6e0d7a086ad67ada37710a658bb2c6caa2f97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/dashgoals/zipball/13667ef6458cdbc55b760a1d9ae75ac76bb13932",
-                "reference": "13667ef6458cdbc55b760a1d9ae75ac76bb13932",
+                "url": "https://api.github.com/repos/PrestaShop/dashgoals/zipball/24d6e0d7a086ad67ada37710a658bb2c6caa2f97",
+                "reference": "24d6e0d7a086ad67ada37710a658bb2c6caa2f97",
                 "shasum": ""
             },
             "require": {
@@ -4874,9 +4875,10 @@
             "description": "PrestaShop module dashgoals",
             "homepage": "https://github.com/PrestaShop/dashgoals",
             "support": {
-                "source": "https://github.com/PrestaShop/dashgoals/tree/v2.0.4"
+                "issues": "https://github.com/PrestaShop/dashgoals/issues",
+                "source": "https://github.com/PrestaShop/dashgoals/tree/v2.0.5"
             },
-            "time": "2023-03-22T16:16:12+00:00"
+            "time": "2026-04-04T11:33:46+00:00"
         },
         {
             "name": "prestashop/dashproducts",
@@ -6054,16 +6056,16 @@
         },
         {
             "name": "prestashop/ps_facetedsearch",
-            "version": "v4.0.3",
+            "version": "v4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_facetedsearch.git",
-                "reference": "bd9f09e81d1d49a936b4c0c3fa6b7e846bc53e76"
+                "reference": "08d80f46ef101389a8128232b1a208142c28a718"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_facetedsearch/zipball/bd9f09e81d1d49a936b4c0c3fa6b7e846bc53e76",
-                "reference": "bd9f09e81d1d49a936b4c0c3fa6b7e846bc53e76",
+                "url": "https://api.github.com/repos/PrestaShop/ps_facetedsearch/zipball/08d80f46ef101389a8128232b1a208142c28a718",
+                "reference": "08d80f46ef101389a8128232b1a208142c28a718",
                 "shasum": ""
             },
             "require": {
@@ -6100,9 +6102,9 @@
             "homepage": "https://github.com/PrestaShop/ps_facetedsearch",
             "support": {
                 "issues": "https://github.com/PrestaShop/ps_facetedsearch/issues",
-                "source": "https://github.com/PrestaShop/ps_facetedsearch/tree/v4.0.3"
+                "source": "https://github.com/PrestaShop/ps_facetedsearch/tree/v4.0.4"
             },
-            "time": "2025-12-31T13:27:28+00:00"
+            "time": "2026-06-03T10:20:29+00:00"
         },
         {
             "name": "prestashop/ps_faviconnotificationbo",
@@ -18382,5 +18384,5 @@
     "platform-overrides": {
         "php": "8.1.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
